@@ -95,43 +95,6 @@ Registers a new bike or updates metadata for an existing one.
       "bike_id": "RAPTEE_PRO_005",
       "metadata": {
         "color": "Matte Black",
-        "firmware": "v2.1.0"
-      }
-    }
-    ```
-
-### 3. Ingest Telemetry (Sync)
-Batch upload telemetry logs.
--   **POST** `/api/v1/sync`
--   **Body**:
-    ```json
-    {
-      "bike_id": "RAPTEE_PRO_005",
-      "sync_timestamp": "2023-10-27T10:00:00Z",
-      "columns": ["uuid", "timestamp", "type", "val_primary", "lat", "lng", "payload"],
-      "data": [
-        ["uuid-1", "2023-10-27T10:00:01Z", "GPS", 0, 12.9716, 77.5946, {}]
-      ]
-    }
-    ```
-
-### 4. Read Telemetry
-Retrieve telemetry logs with cursor-based pagination.
--   **GET** `/api/v1/telemetry`
--   **Query Params**:
-    -   `bike_id` (required)
-    -   `cursor` (optional, for pagination)
--   **Response**:
-    ```json
-    {
-      "data": [...],
-      "next_cursor": "base64_string..."
-    }
-    ```
-
-## Project Structure
-
-```
 raptee-backend/
 ├── schema/             # SQL Migration files
 │   └── 001_init.sql    # Initial schema
