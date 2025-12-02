@@ -16,6 +16,7 @@ import (
 )
 
 var db *pgxpool.Pool
+var GlobalSchemas map[string][]string
 
 // --- STRUCTS (For JSON Parsing) ---
 
@@ -29,7 +30,6 @@ type CompactRequest struct {
 type ProvisionRequest struct {
 	BikeID   string                 `json:"bike_id"`
 	Metadata map[string]interface{} `json:"metadata"`
-	Schemas  map[string][]string    `json:"schemas"` // New: "API_LATENCY": ["url", "latency"]
 }
 
 // --- MAIN FUNCTION ---
@@ -48,7 +48,24 @@ func main() {
 	}
 	defer db.Close()
 
-	// 2. Router Setup
+	// 2. Load Global Schemas
+	GlobalSchemas = make(map[string][]string)
+	rows, err := db.Query(context.Background(), "SELECT log_type, fields FROM log_schemas")
+	if err != nil {
+		log.Printf("Warning: Could not load schemas: %v", err)
+	} else {
+		defer rows.Close()
+		for rows.Next() {
+			var lType string
+			var fields []string
+			if err := rows.Scan(&lType, &fields); err == nil {
+				GlobalSchemas[lType] = fields
+			}
+		}
+	}
+	fmt.Printf("Loaded %d schemas\n", len(GlobalSchemas))
+
+	// 3. Router Setup
 	r := gin.Default()
 
 	// Enable CORS for Flutter Web (Important for cross-domain calls)
@@ -57,13 +74,13 @@ func main() {
 	config.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "Authorization"}
 	r.Use(cors.New(config))
 
-	// 3. Endpoints
+	// 4. Endpoints
 	r.GET("/health", func(c *gin.Context) { c.JSON(200, gin.H{"status": "ok"}) })
 	r.POST("/api/v1/sync", handleSync)       // Write Ingestion
 	r.POST("/api/v1/provision", handleProvision) // Provision/Update Bike
 	r.GET("/api/v1/telemetry", handleRead)   // Read Pagination
 
-	// 4. Start Server (AWS App Runner defaults to Port 8080)
+	// 5. Start Server (AWS App Runner defaults to Port 8080)
 	port := os.Getenv("PORT")
 	if port == "" { port = "8080" }
 	r.Run(":" + port)
@@ -76,14 +93,6 @@ func handleSync(c *gin.Context) {
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid JSON format: " + err.Error()})
 		return
-	}
-
-	// 1. Fetch Schemas for this bike (Optimization: Cache this in memory/Redis in prod)
-	var schemas map[string][]string
-	err := db.QueryRow(context.Background(), "SELECT schemas FROM bikes WHERE bike_id=$1", req.BikeID).Scan(&schemas)
-	if err != nil {
-		// If bike not found or no schemas, we proceed with empty schemas (legacy mode)
-		schemas = make(map[string][]string)
 	}
 
 	// Map columns to indices for dynamic parsing
@@ -123,12 +132,12 @@ func handleSync(c *gin.Context) {
 		lType, _ := get(row, "type").(string)
 		rawPayload := get(row, "payload")
 
-		// EXPAND PAYLOAD (If it's an array and we have a schema)
+		// EXPAND PAYLOAD (If it's an array and we have a global schema)
 		var finalPayload interface{} = rawPayload
 		
 		// Check if rawPayload is a slice (JSON Array)
 		if payloadVals, ok := rawPayload.([]interface{}); ok {
-			if keys, hasSchema := schemas[lType]; hasSchema {
+			if keys, hasSchema := GlobalSchemas[lType]; hasSchema {
 				// Zip Keys + Values
 				expanded := make(map[string]interface{})
 				for i, val := range payloadVals {
@@ -180,18 +189,17 @@ func handleProvision(c *gin.Context) {
 		return
 	}
 
-	// Upsert Bike Metadata AND Schemas
+	// Upsert Bike Metadata
 	sql := `
-	INSERT INTO bikes (bike_id, metadata, schemas, last_seen_at)
-	VALUES ($1, $2, $3, NOW())
+	INSERT INTO bikes (bike_id, metadata, last_seen_at)
+	VALUES ($1, $2, NOW())
 	ON CONFLICT (bike_id)
-	DO UPDATE SET metadata = $2, schemas = $3, last_seen_at = NOW()`
+	DO UPDATE SET metadata = $2, last_seen_at = NOW()`
 
 	// Handle nil maps gracefully
 	if req.Metadata == nil { req.Metadata = make(map[string]interface{}) }
-	if req.Schemas == nil { req.Schemas = make(map[string][]string) }
 
-	_, err := db.Exec(context.Background(), sql, req.BikeID, req.Metadata, req.Schemas)
+	_, err := db.Exec(context.Background(), sql, req.BikeID, req.Metadata)
 	if err != nil {
 		log.Printf("Provision error: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error: " + err.Error()})
