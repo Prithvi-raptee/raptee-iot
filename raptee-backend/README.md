@@ -94,7 +94,13 @@ Registers a new bike or updates metadata for an existing one.
     {
       "bike_id": "RAPTEE_PRO_005",
       "metadata": {
-        "color": "Matte Black",
+      }
+    }
+    ```
+
+## Project Structure
+
+```
 raptee-backend/
 ├── schema/             # SQL Migration files
 │   └── 001_init.sql    # Initial schema
