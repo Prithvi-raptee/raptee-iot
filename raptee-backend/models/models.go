@@ -1,0 +1,15 @@
+package models
+
+// CompactRequest represents the structure for sync requests
+type CompactRequest struct {
+	BikeID    string          `json:"bike_id"`
+	Timestamp string          `json:"sync_timestamp"`
+	Columns   []string        `json:"columns"`
+	Data      [][]interface{} `json:"data"` // List of Lists of "Anything"
+}
+
+// ProvisionRequest represents the structure for provision requests
+type ProvisionRequest struct {
+	BikeID   string                 `json:"bike_id"`
+	Metadata map[string]interface{} `json:"metadata"`
+}
