@@ -1,0 +1,8 @@
+{
+  "bike_id": "CURL_TEST_01",
+  "sync_timestamp": "2023-10-27T10:00:00Z",
+  "columns": ["uuid", "timestamp", "type", "val_primary", "lat", "lng", "payload"],
+  "data": [
+    ["550e8400-e29b-41d4-a716-446655440000", "2023-10-27T10:00:00Z", "API_LATENCY", 120, 12.9716, 77.5946, ["/api/v1/sync", "success", 200, "", 4, "connected", "4G"]]
+  ]
+}
