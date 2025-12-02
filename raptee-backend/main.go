@@ -26,6 +26,11 @@ type CompactRequest struct {
 	Data      [][]interface{} `json:"data"` // List of Lists of "Anything"
 }
 
+type ProvisionRequest struct {
+	BikeID   string                 `json:"bike_id"`
+	Metadata map[string]interface{} `json:"metadata"`
+}
+
 // --- MAIN FUNCTION ---
 
 func main() {
@@ -54,6 +59,7 @@ func main() {
 	// 3. Endpoints
 	r.GET("/health", func(c *gin.Context) { c.JSON(200, gin.H{"status": "ok"}) })
 	r.POST("/api/v1/sync", handleSync)       // Write Ingestion
+	r.POST("/api/v1/provision", handleProvision) // Provision/Update Bike
 	r.GET("/api/v1/telemetry", handleRead)   // Read Pagination
 
 	// 4. Start Server (AWS App Runner defaults to Port 8080)
@@ -132,6 +138,38 @@ func handleSync(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"status": "success"})
+}
+
+// --- PROVISION HANDLER ---
+
+func handleProvision(c *gin.Context) {
+	var req ProvisionRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid JSON format: " + err.Error()})
+		return
+	}
+
+	if req.BikeID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "bike_id is required"})
+		return
+	}
+
+	// Upsert Bike Metadata
+	// Assumes 'metadata' column exists in 'bikes' table as JSONB
+	sql := `
+	INSERT INTO bikes (bike_id, metadata, last_seen_at)
+	VALUES ($1, $2, NOW())
+	ON CONFLICT (bike_id)
+	DO UPDATE SET metadata = $2, last_seen_at = NOW()`
+
+	_, err := db.Exec(context.Background(), sql, req.BikeID, req.Metadata)
+	if err != nil {
+		log.Printf("Provision error: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error: " + err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"status": "provisioned", "bike_id": req.BikeID})
 }
 
 // --- READ HANDLER ---
