@@ -46,6 +46,7 @@ func main() {
 	}
 
 	// 3. Read SQL Files from 'schema' folder
+	// Assuming run from project root
 	files, err := os.ReadDir("schema")
 	if err != nil {
 		log.Fatalf("Could not read schema folder: %v", err)

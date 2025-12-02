@@ -40,6 +40,9 @@ func main() {
 	// STEP 2: Docker Build
 	fmt.Println("\n2. Building Docker Image...")
 	// Note: We use -f Dockerfile and context .
+	// Since this script is now in cmd/deploy, we might need to adjust paths if run from there.
+	// But usually scripts are run from project root.
+	// Assuming run from project root: go run cmd/deploy/main.go
 	buildCmd := exec.Command("docker", "build", "-t", imageURI, "-f", "Dockerfile", ".")
 	buildCmd.Stdout = os.Stdout
 	buildCmd.Stderr = os.Stderr
