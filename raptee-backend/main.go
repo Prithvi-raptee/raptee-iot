@@ -29,6 +29,7 @@ type CompactRequest struct {
 type ProvisionRequest struct {
 	BikeID   string                 `json:"bike_id"`
 	Metadata map[string]interface{} `json:"metadata"`
+	Schemas  map[string][]string    `json:"schemas"` // New: "API_LATENCY": ["url", "latency"]
 }
 
 // --- MAIN FUNCTION ---
@@ -77,6 +78,14 @@ func handleSync(c *gin.Context) {
 		return
 	}
 
+	// 1. Fetch Schemas for this bike (Optimization: Cache this in memory/Redis in prod)
+	var schemas map[string][]string
+	err := db.QueryRow(context.Background(), "SELECT schemas FROM bikes WHERE bike_id=$1", req.BikeID).Scan(&schemas)
+	if err != nil {
+		// If bike not found or no schemas, we proceed with empty schemas (legacy mode)
+		schemas = make(map[string][]string)
+	}
+
 	// Map columns to indices for dynamic parsing
 	colMap := make(map[string]int)
 	for i, col := range req.Columns {
@@ -112,7 +121,24 @@ func handleSync(c *gin.Context) {
 		uuid, _ := get(row, "uuid").(string)
 		tsStr, _ := get(row, "timestamp").(string)
 		lType, _ := get(row, "type").(string)
-		payload := get(row, "payload")
+		rawPayload := get(row, "payload")
+
+		// EXPAND PAYLOAD (If it's an array and we have a schema)
+		var finalPayload interface{} = rawPayload
+		
+		// Check if rawPayload is a slice (JSON Array)
+		if payloadVals, ok := rawPayload.([]interface{}); ok {
+			if keys, hasSchema := schemas[lType]; hasSchema {
+				// Zip Keys + Values
+				expanded := make(map[string]interface{})
+				for i, val := range payloadVals {
+					if i < len(keys) {
+						expanded[keys[i]] = val
+					}
+				}
+				finalPayload = expanded
+			}
+		}
 
 		// Go JSON unmarshals all numbers to float64. We must cast them.
 		var valPrimary int
@@ -122,7 +148,7 @@ func handleSync(c *gin.Context) {
 		if v, ok := get(row, "lng").(float64); ok { lng = v }
 		if v, ok := get(row, "lat").(float64); ok { lat = v }
 
-		_, err := tx.Exec(ctx, sql, uuid, req.BikeID, tsStr, lType, valPrimary, lng, lat, payload)
+		_, err := tx.Exec(ctx, sql, uuid, req.BikeID, tsStr, lType, valPrimary, lng, lat, finalPayload)
 		if err != nil {
 			log.Printf("Row insert error: %v", err)
 			continue
@@ -154,15 +180,18 @@ func handleProvision(c *gin.Context) {
 		return
 	}
 
-	// Upsert Bike Metadata
-	// Assumes 'metadata' column exists in 'bikes' table as JSONB
+	// Upsert Bike Metadata AND Schemas
 	sql := `
-	INSERT INTO bikes (bike_id, metadata, last_seen_at)
-	VALUES ($1, $2, NOW())
+	INSERT INTO bikes (bike_id, metadata, schemas, last_seen_at)
+	VALUES ($1, $2, $3, NOW())
 	ON CONFLICT (bike_id)
-	DO UPDATE SET metadata = $2, last_seen_at = NOW()`
+	DO UPDATE SET metadata = $2, schemas = $3, last_seen_at = NOW()`
 
-	_, err := db.Exec(context.Background(), sql, req.BikeID, req.Metadata)
+	// Handle nil maps gracefully
+	if req.Metadata == nil { req.Metadata = make(map[string]interface{}) }
+	if req.Schemas == nil { req.Schemas = make(map[string][]string) }
+
+	_, err := db.Exec(context.Background(), sql, req.BikeID, req.Metadata, req.Schemas)
 	if err != nil {
 		log.Printf("Provision error: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error: " + err.Error()})
