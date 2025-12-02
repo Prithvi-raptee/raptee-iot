@@ -6,8 +6,8 @@ High-performance Go-based API for handling telemetry data ingestion, storage, an
 
 This project is documented in detail in the following files:
 
--   **[SCHEMA.md](SCHEMA.md)**: Database Design, ER Diagrams, and Global Schema definitions.
--   **[BACKEND.md](BACKEND.md)**: API Reference, Data Flow, and Deployment details.
+-   **[SCHEMA.md](docs/SCHEMA.md)**: Database Design, ER Diagrams, and Global Schema definitions.
+-   **[BACKEND.md](docs/BACKEND.md)**: API Reference, Data Flow, and Deployment details.
 
 ## 🚀 Quick Start
 
@@ -40,8 +40,9 @@ This project is documented in detail in the following files:
 
 ```
 raptee-backend/
-├── SCHEMA.md           # Database Design & ER Diagrams
-├── BACKEND.md          # API Reference & Data Flow
+├── docs/               # Detailed Documentation
+│   ├── SCHEMA.md       # Database Design
+│   └── BACKEND.md      # API Reference
 ├── schema/             # SQL Migration files
 │   └── 001_init.sql    # Initial schema (Tables + Global Schemas)
 ├── Dockerfile          # Docker build definition
