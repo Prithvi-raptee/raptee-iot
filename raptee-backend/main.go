@@ -29,6 +29,7 @@ func main() {
 	r.GET("/health", func(c *gin.Context) { c.JSON(200, gin.H{"status": "ok"}) })
 	r.POST("/api/v1/sync", handlers.HandleSync)           // Write Ingestion
 	r.POST("/api/v1/provision", handlers.HandleProvision) // Provision/Update Bike
+	r.GET("/api/v1/bikes", handlers.HandleListBikes)      // List All Bikes
 	r.GET("/api/v1/telemetry", handlers.HandleRead)       // Read Pagination
 	r.DELETE("/api/v1/provision", handlers.HandleDeleteBike) // Delete Bike
 	r.DELETE("/api/v1/telemetry", handlers.HandleDeleteTelemetry) // Delete Telemetry

@@ -13,3 +13,15 @@ type ProvisionRequest struct {
 	BikeID   string                 `json:"bike_id"`
 	Metadata map[string]interface{} `json:"metadata"`
 }
+
+// Bike represents a bike entity
+type Bike struct {
+	BikeID   string                 `json:"bike_id"`
+	Metadata map[string]interface{} `json:"metadata"`
+}
+
+// BikeListResponse represents the response for listing bikes
+type BikeListResponse struct {
+	NextCursor string `json:"next_cursor"`
+	Data       []Bike `json:"data"`
+}

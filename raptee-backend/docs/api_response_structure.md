@@ -93,7 +93,44 @@ This document outlines the response structures for the available APIs in the Rap
     }
     ```
 
-## 4. Read Telemetry Data
+## 4. List All Bikes
+
+*   **Endpoint:** `GET /api/v1/bikes`
+*   **URL Construction:** `{{BASE_URL}}/api/v1/bikes?limit=<limit>&cursor=<cursor>`
+*   **Description:** Retrieves a list of all bikes with cursor-based pagination.
+*   **Query Parameters:**
+    *   `limit` (optional): Number of bikes to return (default: 50).
+    *   `cursor` (optional): The cursor for pagination (last `bike_id` from previous response).
+
+### Success Response (200 OK)
+
+```json
+{
+  "next_cursor": "<next_cursor_string>",
+  "data": [
+    {
+      "bike_id": "<bike_id>",
+      "metadata": {
+        "model": "T-30",
+        "color": "Red",
+        ...
+      }
+    },
+    ...
+  ]
+}
+```
+
+### Error Responses
+
+*   **500 Internal Server Error:**
+    ```json
+    {
+      "error": "Database error: <error_details>"
+    }
+    ```
+
+## 5. Read Telemetry Data
 
 *   **Endpoint:** `GET /api/v1/telemetry`
 *   **URL Construction:** `{{BASE_URL}}/api/v1/telemetry?bike_id=<bike_id>&cursor=<cursor>`
@@ -124,7 +161,7 @@ This document outlines the response structures for the available APIs in the Rap
     }
     ```
 
-## 5. Delete Bike
+## 6. Delete Bike
 
 *   **Endpoint:** `DELETE /api/v1/provision`
 *   **URL Construction:** `{{BASE_URL}}/api/v1/provision?bike_id=<bike_id>`
@@ -162,7 +199,7 @@ This document outlines the response structures for the available APIs in the Rap
     }
     ```
 
-## 6. Delete Telemetry
+## 7. Delete Telemetry
 
 *   **Endpoint:** `DELETE /api/v1/telemetry`
 *   **URL Construction:** `{{BASE_URL}}/api/v1/telemetry?bike_id=<bike_id>`

@@ -16,6 +16,7 @@ This project is documented in detail in the following files:
 | `GET` | `/health` | Health check. |
 | `POST` | `/api/v1/sync` | Ingest telemetry data. |
 | `POST` | `/api/v1/provision` | Provision or update a bike. |
+| `GET` | `/api/v1/bikes` | List all bikes. |
 | `GET` | `/api/v1/telemetry` | Read telemetry data. |
 | `DELETE` | `/api/v1/provision` | Delete a bike and its data. |
 | `DELETE` | `/api/v1/telemetry` | Delete telemetry data for a bike. |

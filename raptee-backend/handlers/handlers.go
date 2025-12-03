@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -143,6 +144,68 @@ func HandleProvision(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"status": "provisioned", "bike_id": req.BikeID})
+}
+
+// --- LIST BIKES HANDLER ---
+
+func HandleListBikes(c *gin.Context) {
+	cursor := c.Query("cursor")
+	limitStr := c.Query("limit")
+	limit := 50
+
+	if limitStr != "" {
+		if l, err := strconv.Atoi(limitStr); err == nil && l > 0 {
+			limit = l
+		}
+	}
+
+	// Build Query
+	sql := `SELECT bike_id, metadata FROM bikes`
+	args := []interface{}{}
+	argCounter := 1
+
+	if cursor != "" {
+		sql += fmt.Sprintf(` WHERE bike_id > $%d`, argCounter)
+		args = append(args, cursor)
+		argCounter++
+	}
+
+	sql += fmt.Sprintf(` ORDER BY bike_id ASC LIMIT $%d`, argCounter)
+	args = append(args, limit)
+
+	rows, err := db.Pool.Query(context.Background(), sql, args...)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error: " + err.Error()})
+		return
+	}
+	defer rows.Close()
+
+	var bikes []models.Bike
+	var lastBikeID string
+
+	for rows.Next() {
+		var b models.Bike
+		if err := rows.Scan(&b.BikeID, &b.Metadata); err != nil {
+			continue
+		}
+		bikes = append(bikes, b)
+		lastBikeID = b.BikeID
+	}
+
+	nextCursor := ""
+	if len(bikes) == limit {
+		nextCursor = lastBikeID
+	}
+	
+	// Ensure empty slice instead of null in JSON
+	if bikes == nil {
+		bikes = []models.Bike{}
+	}
+
+	c.JSON(http.StatusOK, models.BikeListResponse{
+		NextCursor: nextCursor,
+		Data:       bikes,
+	})
 }
 
 // --- READ HANDLER ---
