@@ -209,3 +209,44 @@ func HandleRead(c *gin.Context) {
 		"data":        data,
 	})
 }
+
+// --- DELETE HANDLERS ---
+
+func HandleDeleteBike(c *gin.Context) {
+	bikeID := c.Query("bike_id")
+	if bikeID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "bike_id is required"})
+		return
+	}
+
+	// Because of ON DELETE CASCADE, this deletes the bike AND all its telemetry logs.
+	res, err := db.Pool.Exec(context.Background(), "DELETE FROM bikes WHERE bike_id = $1", bikeID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete bike: " + err.Error()})
+		return
+	}
+
+	if res.RowsAffected() == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Bike not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"status": "deleted", "bike_id": bikeID})
+}
+
+func HandleDeleteTelemetry(c *gin.Context) {
+	bikeID := c.Query("bike_id")
+	if bikeID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "bike_id is required"})
+		return
+	}
+
+	// Only delete logs, keep the bike registry
+	res, err := db.Pool.Exec(context.Background(), "DELETE FROM telemetry_logs WHERE bike_id = $1", bikeID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete telemetry: " + err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"status": "deleted", "count": res.RowsAffected()})
+}
