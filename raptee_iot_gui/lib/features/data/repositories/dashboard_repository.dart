@@ -1,6 +1,7 @@
 import 'dart:convert';
 import '../datasources/dashboard_remote_datasource.dart';
 import '../models/telemetry_model.dart';
+import '../models/bike_model.dart';
 
 class DashboardRepository {
   final DashboardRemoteDataSource remoteDataSource;
@@ -33,6 +34,15 @@ class DashboardRepository {
           return null;
         }
       }).whereType<TelemetryModel>().toList();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<List<BikeModel>> getBikes({String? cursor, int limit = 50}) async {
+    try {
+      final response = await remoteDataSource.getBikes(cursor: cursor, limit: limit);
+      return response.data;
     } catch (e) {
       rethrow;
     }

@@ -11,6 +11,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     on<DashboardLoadMoreEvent>(_onLoadMore);
     on<DashboardDeleteBikeEvent>(_onDeleteBike);
     on<DashboardDeleteTelemetryEvent>(_onDeleteTelemetry);
+    on<DashboardFetchAllBikesEvent>(_onFetchAllBikes);
   }
 
   Future<void> _onLoad(DashboardLoadEvent event, Emitter<DashboardState> emit) async {
@@ -68,6 +69,22 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
       emit(state.copyWith(
         deleteStatus: DeleteStatus.failure,
         errorMessage: "Failed to delete telemetry: $e",
+      ));
+    }
+  }
+
+  Future<void> _onFetchAllBikes(DashboardFetchAllBikesEvent event, Emitter<DashboardState> emit) async {
+    emit(state.copyWith(status: DashboardStatus.loading));
+    try {
+      final bikes = await repository.getBikes();
+      emit(state.copyWith(
+        status: DashboardStatus.success,
+        bikes: bikes,
+      ));
+    } catch (e) {
+      emit(state.copyWith(
+        status: DashboardStatus.failure,
+        errorMessage: e.toString(),
       ));
     }
   }

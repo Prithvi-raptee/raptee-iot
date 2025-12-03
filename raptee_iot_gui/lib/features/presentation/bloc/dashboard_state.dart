@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import '../../data/models/telemetry_model.dart';
+import '../../data/models/bike_model.dart';
 
 enum DashboardStatus { initial, loading, success, failure }
 enum DeleteStatus { initial, deleting, success, failure }
@@ -9,6 +10,7 @@ class DashboardState extends Equatable {
   final DeleteStatus deleteStatus;
   final String bikeId;
   final List<TelemetryModel> telemetry;
+  final List<BikeModel> bikes;
   final String? nextCursor;
   final String? errorMessage;
 
@@ -17,6 +19,7 @@ class DashboardState extends Equatable {
     this.deleteStatus = DeleteStatus.initial,
     this.bikeId = '',
     this.telemetry = const [],
+    this.bikes = const [],
     this.nextCursor,
     this.errorMessage,
   });
@@ -26,6 +29,7 @@ class DashboardState extends Equatable {
     DeleteStatus? deleteStatus,
     String? bikeId,
     List<TelemetryModel>? telemetry,
+    List<BikeModel>? bikes,
     String? nextCursor,
     String? errorMessage,
   }) {
@@ -34,11 +38,12 @@ class DashboardState extends Equatable {
       deleteStatus: deleteStatus ?? this.deleteStatus,
       bikeId: bikeId ?? this.bikeId,
       telemetry: telemetry ?? this.telemetry,
+      bikes: bikes ?? this.bikes,
       nextCursor: nextCursor ?? this.nextCursor,
       errorMessage: errorMessage ?? this.errorMessage,
     );
   }
 
   @override
-  List<Object?> get props => [status, deleteStatus, bikeId, telemetry, nextCursor, errorMessage];
+  List<Object?> get props => [status, deleteStatus, bikeId, telemetry, bikes, nextCursor, errorMessage];
 }
