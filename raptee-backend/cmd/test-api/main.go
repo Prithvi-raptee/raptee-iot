@@ -29,9 +29,44 @@ func main() {
 		testProvision(bikeID)
 		testSync(bikeID)
 		testRead(bikeID)
+		
+		// Test Deletion
+		testDeleteTelemetry(bikeID)
+		testSync(bikeID) // Sync again to verify cascade delete next
+		testDeleteBike(bikeID)
 	}
 
 	log.Println("\nAll tests completed successfully!")
+}
+
+func testDeleteTelemetry(bikeID string) {
+	req, _ := http.NewRequest("DELETE", fmt.Sprintf("%s/api/v1/telemetry?bike_id=%s", BaseURL, bikeID), nil)
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatalf("Delete telemetry failed: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		log.Fatalf("Delete telemetry failed with status: %d", resp.StatusCode)
+	}
+	log.Printf("Deleted telemetry for %s", bikeID)
+}
+
+func testDeleteBike(bikeID string) {
+	req, _ := http.NewRequest("DELETE", fmt.Sprintf("%s/api/v1/provision?bike_id=%s", BaseURL, bikeID), nil)
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatalf("Delete bike failed: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		log.Fatalf("Delete bike failed with status: %d", resp.StatusCode)
+	}
+	log.Printf("Deleted bike %s", bikeID)
 }
 
 func testHealth() {
