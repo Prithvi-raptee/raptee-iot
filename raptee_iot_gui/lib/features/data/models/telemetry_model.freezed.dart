@@ -21,13 +21,12 @@ TelemetryModel _$TelemetryModelFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$TelemetryModel {
-  String get bikeId => throw _privateConstructorUsedError;
-  double get speed => throw _privateConstructorUsedError;
-  double get batteryLevel => throw _privateConstructorUsedError;
-  double get latitude => throw _privateConstructorUsedError;
-  double get longitude => throw _privateConstructorUsedError;
+  String get uuid => throw _privateConstructorUsedError;
   DateTime get timestamp => throw _privateConstructorUsedError;
-  bool get isMoving => throw _privateConstructorUsedError;
+  String get type => throw _privateConstructorUsedError;
+  @JsonKey(name: 'val_primary')
+  int get valPrimary => throw _privateConstructorUsedError;
+  dynamic get payload => throw _privateConstructorUsedError;
 
   /// Serializes this TelemetryModel to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -47,13 +46,11 @@ abstract class $TelemetryModelCopyWith<$Res> {
   ) = _$TelemetryModelCopyWithImpl<$Res, TelemetryModel>;
   @useResult
   $Res call({
-    String bikeId,
-    double speed,
-    double batteryLevel,
-    double latitude,
-    double longitude,
+    String uuid,
     DateTime timestamp,
-    bool isMoving,
+    String type,
+    @JsonKey(name: 'val_primary') int valPrimary,
+    dynamic payload,
   });
 }
 
@@ -72,44 +69,34 @@ class _$TelemetryModelCopyWithImpl<$Res, $Val extends TelemetryModel>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? bikeId = null,
-    Object? speed = null,
-    Object? batteryLevel = null,
-    Object? latitude = null,
-    Object? longitude = null,
+    Object? uuid = null,
     Object? timestamp = null,
-    Object? isMoving = null,
+    Object? type = null,
+    Object? valPrimary = null,
+    Object? payload = freezed,
   }) {
     return _then(
       _value.copyWith(
-            bikeId: null == bikeId
-                ? _value.bikeId
-                : bikeId // ignore: cast_nullable_to_non_nullable
+            uuid: null == uuid
+                ? _value.uuid
+                : uuid // ignore: cast_nullable_to_non_nullable
                       as String,
-            speed: null == speed
-                ? _value.speed
-                : speed // ignore: cast_nullable_to_non_nullable
-                      as double,
-            batteryLevel: null == batteryLevel
-                ? _value.batteryLevel
-                : batteryLevel // ignore: cast_nullable_to_non_nullable
-                      as double,
-            latitude: null == latitude
-                ? _value.latitude
-                : latitude // ignore: cast_nullable_to_non_nullable
-                      as double,
-            longitude: null == longitude
-                ? _value.longitude
-                : longitude // ignore: cast_nullable_to_non_nullable
-                      as double,
             timestamp: null == timestamp
                 ? _value.timestamp
                 : timestamp // ignore: cast_nullable_to_non_nullable
                       as DateTime,
-            isMoving: null == isMoving
-                ? _value.isMoving
-                : isMoving // ignore: cast_nullable_to_non_nullable
-                      as bool,
+            type: null == type
+                ? _value.type
+                : type // ignore: cast_nullable_to_non_nullable
+                      as String,
+            valPrimary: null == valPrimary
+                ? _value.valPrimary
+                : valPrimary // ignore: cast_nullable_to_non_nullable
+                      as int,
+            payload: freezed == payload
+                ? _value.payload
+                : payload // ignore: cast_nullable_to_non_nullable
+                      as dynamic,
           )
           as $Val,
     );
@@ -126,13 +113,11 @@ abstract class _$$TelemetryModelImplCopyWith<$Res>
   @override
   @useResult
   $Res call({
-    String bikeId,
-    double speed,
-    double batteryLevel,
-    double latitude,
-    double longitude,
+    String uuid,
     DateTime timestamp,
-    bool isMoving,
+    String type,
+    @JsonKey(name: 'val_primary') int valPrimary,
+    dynamic payload,
   });
 }
 
@@ -150,44 +135,34 @@ class __$$TelemetryModelImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? bikeId = null,
-    Object? speed = null,
-    Object? batteryLevel = null,
-    Object? latitude = null,
-    Object? longitude = null,
+    Object? uuid = null,
     Object? timestamp = null,
-    Object? isMoving = null,
+    Object? type = null,
+    Object? valPrimary = null,
+    Object? payload = freezed,
   }) {
     return _then(
       _$TelemetryModelImpl(
-        bikeId: null == bikeId
-            ? _value.bikeId
-            : bikeId // ignore: cast_nullable_to_non_nullable
+        uuid: null == uuid
+            ? _value.uuid
+            : uuid // ignore: cast_nullable_to_non_nullable
                   as String,
-        speed: null == speed
-            ? _value.speed
-            : speed // ignore: cast_nullable_to_non_nullable
-                  as double,
-        batteryLevel: null == batteryLevel
-            ? _value.batteryLevel
-            : batteryLevel // ignore: cast_nullable_to_non_nullable
-                  as double,
-        latitude: null == latitude
-            ? _value.latitude
-            : latitude // ignore: cast_nullable_to_non_nullable
-                  as double,
-        longitude: null == longitude
-            ? _value.longitude
-            : longitude // ignore: cast_nullable_to_non_nullable
-                  as double,
         timestamp: null == timestamp
             ? _value.timestamp
             : timestamp // ignore: cast_nullable_to_non_nullable
                   as DateTime,
-        isMoving: null == isMoving
-            ? _value.isMoving
-            : isMoving // ignore: cast_nullable_to_non_nullable
-                  as bool,
+        type: null == type
+            ? _value.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as String,
+        valPrimary: null == valPrimary
+            ? _value.valPrimary
+            : valPrimary // ignore: cast_nullable_to_non_nullable
+                  as int,
+        payload: freezed == payload
+            ? _value.payload
+            : payload // ignore: cast_nullable_to_non_nullable
+                  as dynamic,
       ),
     );
   }
@@ -197,37 +172,31 @@ class __$$TelemetryModelImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$TelemetryModelImpl implements _TelemetryModel {
   const _$TelemetryModelImpl({
-    required this.bikeId,
-    required this.speed,
-    required this.batteryLevel,
-    required this.latitude,
-    required this.longitude,
+    required this.uuid,
     required this.timestamp,
-    this.isMoving = false,
+    required this.type,
+    @JsonKey(name: 'val_primary') required this.valPrimary,
+    required this.payload,
   });
 
   factory _$TelemetryModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$TelemetryModelImplFromJson(json);
 
   @override
-  final String bikeId;
-  @override
-  final double speed;
-  @override
-  final double batteryLevel;
-  @override
-  final double latitude;
-  @override
-  final double longitude;
+  final String uuid;
   @override
   final DateTime timestamp;
   @override
-  @JsonKey()
-  final bool isMoving;
+  final String type;
+  @override
+  @JsonKey(name: 'val_primary')
+  final int valPrimary;
+  @override
+  final dynamic payload;
 
   @override
   String toString() {
-    return 'TelemetryModel(bikeId: $bikeId, speed: $speed, batteryLevel: $batteryLevel, latitude: $latitude, longitude: $longitude, timestamp: $timestamp, isMoving: $isMoving)';
+    return 'TelemetryModel(uuid: $uuid, timestamp: $timestamp, type: $type, valPrimary: $valPrimary, payload: $payload)';
   }
 
   @override
@@ -235,31 +204,24 @@ class _$TelemetryModelImpl implements _TelemetryModel {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$TelemetryModelImpl &&
-            (identical(other.bikeId, bikeId) || other.bikeId == bikeId) &&
-            (identical(other.speed, speed) || other.speed == speed) &&
-            (identical(other.batteryLevel, batteryLevel) ||
-                other.batteryLevel == batteryLevel) &&
-            (identical(other.latitude, latitude) ||
-                other.latitude == latitude) &&
-            (identical(other.longitude, longitude) ||
-                other.longitude == longitude) &&
+            (identical(other.uuid, uuid) || other.uuid == uuid) &&
             (identical(other.timestamp, timestamp) ||
                 other.timestamp == timestamp) &&
-            (identical(other.isMoving, isMoving) ||
-                other.isMoving == isMoving));
+            (identical(other.type, type) || other.type == type) &&
+            (identical(other.valPrimary, valPrimary) ||
+                other.valPrimary == valPrimary) &&
+            const DeepCollectionEquality().equals(other.payload, payload));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
     runtimeType,
-    bikeId,
-    speed,
-    batteryLevel,
-    latitude,
-    longitude,
+    uuid,
     timestamp,
-    isMoving,
+    type,
+    valPrimary,
+    const DeepCollectionEquality().hash(payload),
   );
 
   /// Create a copy of TelemetryModel
@@ -281,32 +243,27 @@ class _$TelemetryModelImpl implements _TelemetryModel {
 
 abstract class _TelemetryModel implements TelemetryModel {
   const factory _TelemetryModel({
-    required final String bikeId,
-    required final double speed,
-    required final double batteryLevel,
-    required final double latitude,
-    required final double longitude,
+    required final String uuid,
     required final DateTime timestamp,
-    final bool isMoving,
+    required final String type,
+    @JsonKey(name: 'val_primary') required final int valPrimary,
+    required final dynamic payload,
   }) = _$TelemetryModelImpl;
 
   factory _TelemetryModel.fromJson(Map<String, dynamic> json) =
       _$TelemetryModelImpl.fromJson;
 
   @override
-  String get bikeId;
-  @override
-  double get speed;
-  @override
-  double get batteryLevel;
-  @override
-  double get latitude;
-  @override
-  double get longitude;
+  String get uuid;
   @override
   DateTime get timestamp;
   @override
-  bool get isMoving;
+  String get type;
+  @override
+  @JsonKey(name: 'val_primary')
+  int get valPrimary;
+  @override
+  dynamic get payload;
 
   /// Create a copy of TelemetryModel
   /// with the given fields replaced by the non-null parameter values.

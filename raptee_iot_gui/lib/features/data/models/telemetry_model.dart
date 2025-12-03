@@ -6,13 +6,11 @@ part 'telemetry_model.g.dart';
 @freezed
 class TelemetryModel with _$TelemetryModel {
   const factory TelemetryModel({
-    required String bikeId,
-    required double speed,
-    required double batteryLevel,
-    required double latitude,
-    required double longitude,
+    required String uuid,
     required DateTime timestamp,
-    @Default(false) bool isMoving,
+    required String type,
+    @JsonKey(name: 'val_primary') required int valPrimary,
+    required dynamic payload,
   }) = _TelemetryModel;
 
   factory TelemetryModel.fromJson(Map<String, dynamic> json) =>

@@ -61,9 +61,9 @@ class ApiClient {
   }
 
   // Generic DELETE method
-  Future<Response> delete(String path, {dynamic data}) async {
+  Future<Response> delete(String path, {dynamic data, Map<String, dynamic>? queryParameters}) async {
     try {
-      return await _dio.delete(path, data: data);
+      return await _dio.delete(path, data: data, queryParameters: queryParameters);
     } catch (e) {
       rethrow;
     }
