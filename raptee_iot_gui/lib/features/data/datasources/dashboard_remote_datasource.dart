@@ -22,8 +22,8 @@ class DashboardRemoteDataSourceImpl implements DashboardRemoteDataSource {
     }
 
     final response = await apiClient.get('/telemetry', queryParameters: queryParams);
-    print("RAW API RESPONSE: ${response.data}");
     return TelemetryResponse.fromJson(response.data);
+
   }
 
   @override
