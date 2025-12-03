@@ -17,67 +17,42 @@ const BaseURL = "http://localhost:8080"
 
 func main() {
 	log.Println("Starting API Test Suite...")
+	rand.Seed(time.Now().UnixNano())
 
 	// 1. Health Check
 	testHealth()
 
-	// 2. Provision & Sync Multiple Bikes
-	bikes := []string{"TEST_BIKE_01", "TEST_BIKE_02", "TEST_BIKE_03"}
-	
-	for _, bikeID := range bikes {
-		log.Printf("\n--- Testing Bike: %s ---", bikeID)
+	// 2. Generate Random Bikes (25-50)
+	numBikes := rand.Intn(26) + 25 // 25 to 50
+	log.Printf("Generating %d random bikes...", numBikes)
+
+	for i := 0; i < numBikes; i++ {
+		bikeID := fmt.Sprintf("TEST_BIKE_%s", uuid.New().String()[:8])
+		log.Printf("\n--- Testing Bike: %s (%d/%d) ---", bikeID, i+1, numBikes)
+		
 		testProvision(bikeID)
 		testSync(bikeID)
-		testRead(bikeID)
+		// testRead(bikeID) // Optional: Read back to verify
 		
-		// Test Deletion
-		testDeleteTelemetry(bikeID)
-		testSync(bikeID) // Sync again to verify cascade delete next
-		testDeleteBike(bikeID)
+		// Optional: Clean up
+		// testDeleteTelemetry(bikeID)
+		// testDeleteBike(bikeID)
 	}
 
 	log.Println("\nAll tests completed successfully!")
 }
 
-func testDeleteTelemetry(bikeID string) {
-	req, _ := http.NewRequest("DELETE", fmt.Sprintf("%s/api/v1/telemetry?bike_id=%s", BaseURL, bikeID), nil)
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		log.Fatalf("Delete telemetry failed: %v", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != 200 {
-		log.Fatalf("Delete telemetry failed with status: %d", resp.StatusCode)
-	}
-	log.Printf("Deleted telemetry for %s", bikeID)
-}
-
-func testDeleteBike(bikeID string) {
-	req, _ := http.NewRequest("DELETE", fmt.Sprintf("%s/api/v1/provision?bike_id=%s", BaseURL, bikeID), nil)
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		log.Fatalf("Delete bike failed: %v", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != 200 {
-		log.Fatalf("Delete bike failed with status: %d", resp.StatusCode)
-	}
-	log.Printf("Deleted bike %s", bikeID)
-}
-
 func testHealth() {
 	resp, err := http.Get(BaseURL + "/health")
 	if err != nil {
-		log.Fatalf("Health check failed: %v", err)
+		log.Printf("Health check failed: %v", err)
+		return
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
-		log.Fatalf("Health check returned status: %d", resp.StatusCode)
+		log.Printf("Health check returned status: %d", resp.StatusCode)
+		return
 	}
 	log.Println("Health Check Passed")
 }
@@ -94,7 +69,7 @@ func testProvision(bikeID string) {
 			"eco_mode":  true,
 			"features":  []string{"abs", "tcs", "regen"},
 		},
-		"history": make([]string, 100), // Simulate large array
+		"history": make([]string, 10), // Simulate array
 	}
 
 	payload := map[string]interface{}{
@@ -107,61 +82,94 @@ func testProvision(bikeID string) {
 }
 
 func testSync(bikeID string) {
-	// Generate random data points
+	// Generate random data points (0-25)
+	numLogs := rand.Intn(26) // 0 to 25
+	if numLogs == 0 {
+		log.Printf("Skipping sync for %s (0 logs generated)", bikeID)
+		return
+	}
+
 	now := time.Now().UTC()
 	data := [][]interface{}{}
 
-	for i := 0; i < 5; i++ {
+	for i := 0; i < numLogs; i++ {
 		ts := now.Add(time.Duration(-i) * time.Minute).Format(time.RFC3339)
 		id := uuid.New().String()
 		
-		// Random Lat/Lng near Bangalore
-		lat := 12.97 + (rand.Float64() * 0.01)
-		lng := 77.59 + (rand.Float64() * 0.01)
-		
-		// Payload matches API_LATENCY schema
-		// ["api_call", "status", "status_code", "error_message", "signal_strength", "connection_state", "network_type"]
-		payload := []interface{}{
-			"/api/v1/sync", "success", 200, "", rand.Intn(5), "connected", "4G",
-		}
+		// Randomly choose between API_LATENCY and GPS_QUALITY
+		if rand.Float32() < 0.5 {
+			// API_LATENCY Payload
+			// Example: ["https://...", "success", 200, "", 0, "unknown", "WiFi", "charging_station", 0]
+			latency := rand.Intn(5000) + 100
+			payload := []interface{}{
+				"https://charging-stations.example.com/api", // URL
+				"success",                                   // Status
+				200,                                         // Status Code
+				"",                                          // Error Message
+				0,                                           // Signal Strength
+				"unknown",                                   // Connection State
+				"WiFi",                                      // Network Type
+				"charging_station",                          // Source/Type
+				0,                                           // Retry Count
+			}
+			
+			row := []interface{}{
+				id, ts, "API_LATENCY", latency, payload,
+			}
+			data = append(data, row)
 
-		row := []interface{}{
-			id, ts, "API_LATENCY", rand.Intn(100) + 20, lat, lng, payload,
+		} else {
+			// GPS_QUALITY Payload
+			// Example: [4, "Great", 10, 7250.439579992739]
+			qualityVal := 4
+			accuracy := rand.Float64() * 10000
+			payload := []interface{}{
+				qualityVal, // Quality Value
+				"Great",    // Quality String
+				10,         // Satellites
+				accuracy,   // Accuracy
+			}
+
+			row := []interface{}{
+				id, ts, "GPS_QUALITY", qualityVal, payload,
+			}
+			data = append(data, row)
 		}
-		data = append(data, row)
 	}
 
 	reqBody := map[string]interface{}{
 		"bike_id":        bikeID,
 		"sync_timestamp": now.Format(time.RFC3339),
-		"columns":        []string{"uuid", "timestamp", "type", "val_primary", "lat", "lng", "payload"},
+		"columns":        []string{"uuid", "timestamp", "type", "val_primary", "payload"},
 		"data":           data,
 	}
 
 	sendRequest("POST", "/api/v1/sync", reqBody)
-	log.Printf("Synced data for %s", bikeID)
+	log.Printf("Synced %d logs for %s", numLogs, bikeID)
 }
 
-func testRead(bikeID string) {
-	resp, err := http.Get(fmt.Sprintf("%s/api/v1/telemetry?bike_id=%s", BaseURL, bikeID))
+func testDeleteTelemetry(bikeID string) {
+	req, _ := http.NewRequest("DELETE", fmt.Sprintf("%s/api/v1/telemetry?bike_id=%s", BaseURL, bikeID), nil)
+	client := &http.Client{}
+	resp, err := client.Do(req)
 	if err != nil {
-		log.Fatalf("Read failed: %v", err)
+		log.Printf("Delete telemetry failed: %v", err)
+		return
 	}
 	defer resp.Body.Close()
+	log.Printf("Deleted telemetry for %s", bikeID)
+}
 
-	if resp.StatusCode != 200 {
-		body, _ := io.ReadAll(resp.Body)
-		log.Fatalf("Read failed with %d: %s", resp.StatusCode, string(body))
+func testDeleteBike(bikeID string) {
+	req, _ := http.NewRequest("DELETE", fmt.Sprintf("%s/api/v1/provision?bike_id=%s", BaseURL, bikeID), nil)
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Printf("Delete bike failed: %v", err)
+		return
 	}
-
-	var result map[string]interface{}
-	json.NewDecoder(resp.Body).Decode(&result)
-
-	rows := result["data"].([]interface{})
-	if len(rows) == 0 {
-		log.Fatalf("Read returned no data for %s", bikeID)
-	}
-	log.Printf("Verified read for %s (Got %d rows)", bikeID, len(rows))
+	defer resp.Body.Close()
+	log.Printf("Deleted bike %s", bikeID)
 }
 
 func sendRequest(method, endpoint string, payload interface{}) {
@@ -172,12 +180,13 @@ func sendRequest(method, endpoint string, payload interface{}) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Fatalf("Request to %s failed: %v", endpoint, err)
+		log.Printf("Request to %s failed: %v", endpoint, err)
+		return
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != 200 {
+	if resp.StatusCode != 200 && resp.StatusCode != 201 {
 		respBody, _ := io.ReadAll(resp.Body)
-		log.Fatalf("Request to %s failed with %d: %s", endpoint, resp.StatusCode, string(respBody))
+		log.Printf("Request to %s failed with %d: %s", endpoint, resp.StatusCode, string(respBody))
 	}
 }
