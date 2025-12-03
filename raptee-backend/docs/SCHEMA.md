@@ -48,7 +48,7 @@ Stores the massive stream of telemetry events.
 | Column | Type | Description |
 | :--- | :--- | :--- |
 | `log_id` | `UUID` | **Part of PK**. Generated on the bike to ensure uniqueness. |
-| `bike_id` | `TEXT` | **Part of PK**. Foreign Key to `bikes`. |
+| `bike_id` | `TEXT` | **Part of PK**. Foreign Key to `bikes` (**ON DELETE CASCADE**). |
 | `logged_at` | `TIMESTAMPTZ` | When the event happened (not when it was received). |
 | `log_type` | `TEXT` | The type of event (e.g., `API_LATENCY`, `GPS_ANOMALY`). |
 | `val_primary` | `INTEGER` | Extracted value for fast sorting (Latency in ms, Signal %). |

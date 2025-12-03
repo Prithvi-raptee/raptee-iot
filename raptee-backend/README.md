@@ -36,13 +36,19 @@ This project is documented in detail in the following files:
     ```
     Server runs on `http://localhost:8080`.
 
+4.  **Run Tests**:
+    ```bash
+    go run cmd/test-api/main.go
+    ```
+
 ## Project Structure
 
 ```
 raptee-backend/
 ├── cmd/                # Command-line applications
 │   ├── deploy/         # Deployment automation script
-│   └── migrate/        # Database migration script
+│   ├── migrate/        # Database migration script
+│   └── test-api/       # API Integration Tests
 ├── db/                 # Database connection and schema management
 ├── docs/               # Detailed Documentation
 │   ├── SCHEMA.md       # Database Design
@@ -50,7 +56,8 @@ raptee-backend/
 ├── handlers/           # HTTP Request Handlers
 ├── models/             # Data structures
 ├── schema/             # SQL Migration files
-│   └── 001_init.sql    # Initial schema (Tables + Global Schemas)
+│   ├── 001_init.sql    # Initial schema (Tables + Global Schemas)
+│   └── 002_add_cascade_delete.sql # Enable Cascade Delete
 ├── utils/              # Utility functions
 ├── Dockerfile          # Docker build definition
 ├── go.mod              # Go module definition

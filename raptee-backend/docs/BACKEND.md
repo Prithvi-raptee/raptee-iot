@@ -98,6 +98,53 @@ Retrieves logs with **Cursor-Based Pagination**.
 }
 ```
 
+### 4. Delete Bike
+**DELETE** `/api/v1/provision`
+
+Deletes a bike and **all its associated telemetry data**.
+
+**Query Parameters:**
+-   `bike_id`: (Required) The ID of the bike to delete.
+
+**Response:**
+```json
+{
+    "status": "deleted",
+    "bike_id": "RAPTEE_PRO_005"
+}
+```
+
+### 5. Delete Telemetry
+**DELETE** `/api/v1/telemetry`
+
+Deletes **only** the telemetry logs for a specific bike. The bike registry remains.
+
+**Query Parameters:**
+-   `bike_id`: (Required) The ID of the bike.
+
+**Response:**
+```json
+{
+    "status": "deleted",
+    "count": 150
+}
+```
+
+## Testing
+
+The project includes a comprehensive test script to verify all endpoints.
+
+```bash
+go run cmd/test-api/main.go
+```
+
+This script will:
+1.  Check `/health`.
+2.  Provision test bikes.
+3.  Sync telemetry data.
+4.  Verify data retrieval.
+5.  Test deletion of telemetry and bikes.
+
 ## Deployment
 
 The project includes a `deploy.go` script for AWS ECR deployment.
