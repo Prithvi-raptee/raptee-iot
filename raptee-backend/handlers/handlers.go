@@ -93,14 +93,16 @@ func HandleSync(c *gin.Context) {
 		_, err := tx.Exec(ctx, sql, uuid, req.BikeID, tsStr, lType, valPrimary, lng, lat, finalPayload)
 		if err != nil {
 			log.Printf("Row insert error: %v", err)
-			continue
+			// In Postgres, an error invalidates the transaction. We must rollback and return the error.
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Row insert failed: " + err.Error()})
+			return
 		}
 	}
 	// Update Heartbeat (non-critical, can run outside transaction)
 	db.Pool.Exec(ctx, `INSERT INTO bikes (bike_id, last_seen_at) VALUES ($1, NOW()) ON CONFLICT (bike_id) DO UPDATE SET last_seen_at = NOW()`, req.BikeID)
 
 	if err := tx.Commit(ctx); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Commit failed"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Commit failed: " + err.Error()})
 		return
 	}
 
