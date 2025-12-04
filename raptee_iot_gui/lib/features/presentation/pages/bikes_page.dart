@@ -3,14 +3,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_typography.dart';
+import '../../../core/widgets/confirmation_dialog.dart';
+import '../../data/models/bike_model.dart';
 import '../bloc/dashboard_bloc.dart';
 import '../bloc/dashboard_event.dart';
 import '../bloc/dashboard_state.dart';
-import '../../data/repositories/dashboard_repository.dart';
-import '../../data/datasources/dashboard_remote_datasource.dart';
-import '../../../core/network/api_client.dart';
-import '../../../core/theme/app_typography.dart';
-import '../../data/models/bike_model.dart';
 import '../widgets/custom_error_widget.dart';
 
 class BikesPage extends StatelessWidget {
@@ -22,14 +20,68 @@ class BikesPage extends StatelessWidget {
   }
 }
 
-class _BikesView extends StatelessWidget {
+class _BikesView extends StatefulWidget {
   const _BikesView();
 
   @override
+  State<_BikesView> createState() => _BikesViewState();
+}
+
+class _BikesViewState extends State<_BikesView> {
+  final Set<String> _selectedBikeIds = {};
+
+  void _toggleSelection(String bikeId) {
+    setState(() {
+      if (_selectedBikeIds.contains(bikeId)) {
+        _selectedBikeIds.remove(bikeId);
+      } else {
+        _selectedBikeIds.add(bikeId);
+      }
+    });
+  }
+
+  void _selectAll(bool? selected, List<BikeModel> bikes) {
+    setState(() {
+      if (selected == true) {
+        _selectedBikeIds.addAll(bikes.map((b) => b.bikeId));
+      } else {
+        _selectedBikeIds.clear();
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return BlocBuilder<DashboardBloc, DashboardState>(
+    return BlocConsumer<DashboardBloc, DashboardState>(
+      listenWhen: (previous, current) =>
+          previous.deleteStatus != current.deleteStatus,
+      listener: (context, state) {
+        if (state.deleteStatus == DeleteStatus.success) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                "Operation completed successfully",
+                style: AppTypography.body.copyWith(color: Colors.white),
+              ),
+              backgroundColor: AppColors.success,
+            ),
+          );
+          setState(() {
+            _selectedBikeIds.clear();
+          });
+        } else if (state.deleteStatus == DeleteStatus.failure) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                state.errorMessage ?? "Operation failed",
+                style: AppTypography.body.copyWith(color: Colors.white),
+              ),
+              backgroundColor: AppColors.error,
+            ),
+          );
+        }
+      },
       builder: (context, state) {
-        // Show loading only on initial load, not on refresh if data exists
         if (state.status == DashboardStatus.loading && state.bikes.isEmpty) {
           return const Center(child: CircularProgressIndicator());
         }
@@ -47,18 +99,25 @@ class _BikesView extends StatelessWidget {
           );
         }
 
+        final bikes = state.bikes;
+        final allSelected =
+            bikes.isNotEmpty && _selectedBikeIds.length == bikes.length;
+        final theme = Theme.of(context);
+        final colorScheme = theme.colorScheme;
+
         return Padding(
           padding: const EdgeInsets.all(24.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Header
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
                     "All Bikes",
                     style: AppTypography.h2.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface,
+                      color: colorScheme.onSurface,
                     ),
                   ),
                   Row(
@@ -72,6 +131,103 @@ class _BikesView extends StatelessWidget {
                             child: CircularProgressIndicator(strokeWidth: 2),
                           ),
                         ),
+                      if (_selectedBikeIds.isNotEmpty) ...[
+                        Text(
+                          "${_selectedBikeIds.length} selected",
+                          style: AppTypography.body.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        PopupMenuButton<String>(
+                          icon: Icon(
+                            TablerIcons.dots_vertical,
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                          color: theme.colorScheme.surface,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            side: BorderSide(color: theme.dividerColor),
+                          ),
+                          onSelected: (value) {
+                            if (value == 'delete_telemetry') {
+                              ConfirmationDialog.show(
+                                context: context,
+                                title: 'Delete Telemetry',
+                                content:
+                                    'Are you sure you want to delete telemetry for ${_selectedBikeIds.length} bikes?',
+                                confirmText: 'Delete',
+                                isDangerous: true,
+                                onConfirm: () {
+                                  context.read<DashboardBloc>().add(
+                                    DashboardDeleteTelemetryBulkEvent(
+                                      _selectedBikeIds.toList(),
+                                    ),
+                                  );
+                                },
+                              );
+                            } else if (value == 'delete_bikes') {
+                              ConfirmationDialog.show(
+                                context: context,
+                                title: 'Delete Bikes',
+                                content:
+                                    'Are you sure you want to delete ${_selectedBikeIds.length} bikes?',
+                                confirmText: 'Delete',
+                                isDangerous: true,
+                                onConfirm: () {
+                                  context.read<DashboardBloc>().add(
+                                    DashboardDeleteBikesEvent(
+                                      _selectedBikeIds.toList(),
+                                    ),
+                                  );
+                                },
+                              );
+                            }
+                          },
+                          itemBuilder: (BuildContext context) =>
+                              <PopupMenuEntry<String>>[
+                            PopupMenuItem<String>(
+                              value: 'delete_telemetry',
+                              child: Row(
+                                children: [
+                                  const Icon(
+                                    TablerIcons.trash,
+                                    size: 18,
+                                    color: AppColors.warning,
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Text(
+                                    'Delete Telemetry',
+                                    style: AppTypography.body.copyWith(
+                                      color: theme.colorScheme.onSurface,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            PopupMenuItem<String>(
+                              value: 'delete_bikes',
+                              child: Row(
+                                children: [
+                                  const Icon(
+                                    TablerIcons.trash_x,
+                                    size: 18,
+                                    color: AppColors.error,
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Text(
+                                    'Delete Bikes',
+                                    style: AppTypography.body.copyWith(
+                                      color: theme.colorScheme.onSurface,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(width: 16),
+                      ],
                       ElevatedButton.icon(
                         onPressed: state.status == DashboardStatus.loading
                             ? null
@@ -83,8 +239,8 @@ class _BikesView extends StatelessWidget {
                         icon: const Icon(TablerIcons.refresh, size: 18),
                         label: const Text("Refresh"),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme.of(context).colorScheme.primary,
-                          foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                          backgroundColor: colorScheme.primary,
+                          foregroundColor: colorScheme.onPrimary,
                           elevation: 0,
                           padding: const EdgeInsets.symmetric(
                             horizontal: 16,
@@ -100,19 +256,136 @@ class _BikesView extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 24),
+
+              // List Container
               Expanded(
-                child: GridView.builder(
-                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                    maxCrossAxisExtent: 300, // Responsive width
-                    mainAxisSpacing: 16,
-                    crossAxisSpacing: 16,
-                    childAspectRatio: 1.2,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: theme.cardColor,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: theme.dividerColor),
                   ),
-                  itemCount: state.bikes.length,
-                  itemBuilder: (context, index) {
-                    final bike = state.bikes[index];
-                    return _BikeCard(bike: bike);
-                  },
+                  child: Column(
+                    children: [
+                      // Table Header
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 12),
+                        child: Row(
+                          children: [
+                            SizedBox(
+                              width: 40,
+                              child: Checkbox(
+                                value: allSelected,
+                                onChanged: (val) => _selectAll(val, bikes),
+                              ),
+                            ),
+                            Expanded(
+                              flex: 3,
+                              child: Text(
+                                "Bike ID",
+                                style: AppTypography.caption.copyWith(
+                                  color: colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              flex: 2,
+                              child: Text(
+                                "Model",
+                                style: AppTypography.caption.copyWith(
+                                  color: colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              flex: 2,
+                              child: Text(
+                                "Color",
+                                style: AppTypography.caption.copyWith(
+                                  color: colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ),
+
+                          ],
+                        ),
+                      ),
+                      Divider(height: 1, color: theme.dividerColor),
+
+                      // List Items
+                      Expanded(
+                        child: ListView.separated(
+                          itemCount: bikes.length,
+                          separatorBuilder: (context, index) =>
+                              Divider(height: 1, color: theme.dividerColor),
+                          itemBuilder: (context, index) {
+                            final bike = bikes[index];
+                            final isSelected =
+                                _selectedBikeIds.contains(bike.bikeId);
+
+                            return InkWell(
+                              onTap: () {
+                                context.goNamed(
+                                  'details',
+                                  pathParameters: {'bikeId': bike.bikeId},
+                                );
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 20,
+                                  vertical: 12,
+                                ),
+                                child: Row(
+                                  children: [
+                                    SizedBox(
+                                      width: 40,
+                                      child: Checkbox(
+                                        value: isSelected,
+                                        onChanged: (val) =>
+                                            _toggleSelection(bike.bikeId),
+                                      ),
+                                    ),
+                                    Expanded(
+                                      flex: 3,
+                                      child: Text(
+                                        bike.bikeId,
+                                        style: AppTypography.body.copyWith(
+                                          color: colorScheme.onSurface,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                    Expanded(
+                                      flex: 2,
+                                      child: Text(
+                                        bike.metadata['model'] as String? ??
+                                            '-',
+                                        style: AppTypography.body.copyWith(
+                                          color: colorScheme.onSurface,
+                                        ),
+                                      ),
+                                    ),
+                                    Expanded(
+                                      flex: 2,
+                                      child: Text(
+                                        bike.metadata['color'] as String? ??
+                                            '-',
+                                        style: AppTypography.body.copyWith(
+                                          color: colorScheme.onSurface,
+                                        ),
+                                      ),
+                                    ),
+
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -121,104 +394,6 @@ class _BikesView extends StatelessWidget {
       },
     );
   }
-}
 
-class _BikeCard extends StatelessWidget {
-  final BikeModel bike;
 
-  const _BikeCard({required this.bike});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: theme.dividerColor),
-      ),
-      color: theme.cardColor,
-      child: InkWell(
-        onTap: () {
-          context.goNamed('details', pathParameters: {'bikeId': bike.bikeId});
-        },
-        borderRadius: BorderRadius.circular(12),
-        hoverColor: theme.hoverColor,
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: colorScheme.primary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(
-                      TablerIcons.motorbike,
-                      color: colorScheme.primary,
-                      size: 24,
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.success.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      "Active",
-                      style: AppTypography.caption.copyWith(
-                        color: AppColors.success,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const Spacer(),
-              Text(
-                bike.bikeId,
-                style: AppTypography.h3.copyWith(color: colorScheme.onSurface),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                "${bike.metadata['model'] ?? 'Unknown Model'} • ${bike.metadata['color'] ?? 'Unknown Color'}",
-                style: AppTypography.body.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Text(
-                    "View Analytics",
-                    style: AppTypography.caption.copyWith(
-                      color: colorScheme.primary,
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  Icon(
-                    TablerIcons.arrow_right,
-                    size: 14,
-                    color: colorScheme.primary,
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 }
