@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
-import 'package:go_router/go_router.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
+import 'package:intl/intl.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_typography.dart';
 import '../bloc/dashboard_bloc.dart';
 import '../bloc/dashboard_event.dart';
 import '../bloc/dashboard_state.dart';
 import '../../data/repositories/dashboard_repository.dart';
 import '../../data/datasources/dashboard_remote_datasource.dart';
 import '../../../core/network/api_client.dart';
-import '../../../core/theme/app_typography.dart';
-import '../../data/models/bike_model.dart';
 import '../widgets/custom_error_widget.dart';
+import '../../data/models/bike_model.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -26,7 +27,6 @@ class _DashboardPageState extends State<DashboardPage> {
   @override
   void initState() {
     super.initState();
-    // Initialize dependencies once
     final apiClient = ApiClient();
     final dataSource = DashboardRemoteDataSourceImpl(apiClient: apiClient);
     _repository = DashboardRepository(remoteDataSource: dataSource);
@@ -38,19 +38,18 @@ class _DashboardPageState extends State<DashboardPage> {
       create: (context) =>
           DashboardBloc(repository: _repository)
             ..add(const DashboardFetchAllBikesEvent()),
-      child: const _DashboardView(),
+      child: const _DashboardAnalyticsView(),
     );
   }
 }
 
-class _DashboardView extends StatelessWidget {
-  const _DashboardView();
+class _DashboardAnalyticsView extends StatelessWidget {
+  const _DashboardAnalyticsView();
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<DashboardBloc, DashboardState>(
       builder: (context, state) {
-        // Show loading only on initial load, not on refresh if data exists
         if (state.status == DashboardStatus.loading && state.bikes.isEmpty) {
           return const Center(child: CircularProgressIndicator());
         }
@@ -68,72 +67,114 @@ class _DashboardView extends StatelessWidget {
           );
         }
 
-        return Padding(
+        final bikes = state.bikes;
+        final totalBikes = bikes.length;
+        final modelData = _getModelData(bikes);
+        final colorData = _getColorData(bikes);
+        final registrationData = _getRegistrationData(bikes);
+
+        return SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Text(
+                "Dashboard Overview",
+                style: AppTypography.h2.copyWith(
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+              ),
+              const SizedBox(height: 24),
+              
+              // Key Metrics Row
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    "Fleet Overview",
-                    style: AppTypography.h2.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface,
+                  Expanded(
+                    child: _MetricCard(
+                      title: "Total Bikes",
+                      value: totalBikes.toString(),
+                      icon: TablerIcons.motorbike,
+                      color: Theme.of(context).colorScheme.primary,
                     ),
                   ),
-                  Row(
-                    children: [
-                      if (state.status == DashboardStatus.loading)
-                        const Padding(
-                          padding: EdgeInsets.only(right: 16.0),
-                          child: SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          ),
-                        ),
-                      ElevatedButton.icon(
-                        onPressed: state.status == DashboardStatus.loading
-                            ? null
-                            : () {
-                                context.read<DashboardBloc>().add(
-                                  const DashboardFetchAllBikesEvent(),
-                                );
-                              },
-                        icon: const Icon(TablerIcons.refresh, size: 18),
-                        label: const Text("Refresh"),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme.of(context).colorScheme.primary,
-                          foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                          elevation: 0,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 12,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                      ),
-                    ],
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _MetricCard(
+                      title: "Active Models",
+                      value: modelData.length.toString(),
+                      icon: TablerIcons.chart_pie,
+                      color: AppColors.success,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _MetricCard(
+                      title: "Colors",
+                      value: colorData.length.toString(),
+                      icon: TablerIcons.palette,
+                      color: AppColors.warning,
+                    ),
                   ),
                 ],
               ),
               const SizedBox(height: 24),
-              Expanded(
-                child: GridView.builder(
-                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                    maxCrossAxisExtent: 300, // Responsive width
-                    mainAxisSpacing: 16,
-                    crossAxisSpacing: 16,
-                    childAspectRatio: 1.2,
+
+              // Charts Row 1: Models and Colors
+              Row(
+                children: [
+                  Expanded(
+                    child: _ChartCard(
+                      title: "Model Distribution",
+                      child: SfCircularChart(
+                        legend: Legend(isVisible: true, position: LegendPosition.bottom),
+                        series: <CircularSeries>[
+                          DoughnutSeries<_ChartData, String>(
+                            dataSource: modelData,
+                            xValueMapper: (_ChartData data, _) => data.x,
+                            yValueMapper: (_ChartData data, _) => data.y,
+                            dataLabelSettings: const DataLabelSettings(isVisible: true),
+                          )
+                        ],
+                      ),
+                    ),
                   ),
-                  itemCount: state.bikes.length,
-                  itemBuilder: (context, index) {
-                    final bike = state.bikes[index];
-                    return _BikeCard(bike: bike);
-                  },
+                  const SizedBox(width: 24),
+                  Expanded(
+                    child: _ChartCard(
+                      title: "Color Distribution",
+                      child: SfCircularChart(
+                        legend: Legend(isVisible: true, position: LegendPosition.bottom),
+                        series: <CircularSeries>[
+                          PieSeries<_ChartData, String>(
+                            dataSource: colorData,
+                            xValueMapper: (_ChartData data, _) => data.x,
+                            yValueMapper: (_ChartData data, _) => data.y,
+                            dataLabelSettings: const DataLabelSettings(isVisible: true),
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+
+              // Charts Row 2: Registration Trends
+              _ChartCard(
+                title: "Registration Trends",
+                child: SfCartesianChart(
+                  primaryXAxis: CategoryAxis(),
+                  primaryYAxis: NumericAxis(title: AxisTitle(text: 'Bikes Registered')),
+                  tooltipBehavior: TooltipBehavior(enable: true),
+                  series: <CartesianSeries>[
+                    ColumnSeries<_ChartData, String>(
+                      name: 'Registrations',
+                      dataSource: registrationData,
+                      xValueMapper: (_ChartData data, _) => data.x,
+                      yValueMapper: (_ChartData data, _) => data.y,
+                      color: Theme.of(context).colorScheme.primary,
+                    )
+                  ],
                 ),
               ),
             ],
@@ -142,104 +183,145 @@ class _DashboardView extends StatelessWidget {
       },
     );
   }
+
+  List<_ChartData> _getModelData(List<BikeModel> bikes) {
+    final Map<String, int> counts = {};
+    for (var bike in bikes) {
+      final model = bike.metadata['model'] as String? ?? 'Unknown';
+      counts[model] = (counts[model] ?? 0) + 1;
+    }
+    return counts.entries.map((e) => _ChartData(e.key, e.value)).toList();
+  }
+
+  List<_ChartData> _getColorData(List<BikeModel> bikes) {
+    final Map<String, int> counts = {};
+    for (var bike in bikes) {
+      final color = bike.metadata['color'] as String? ?? 'Unknown';
+      counts[color] = (counts[color] ?? 0) + 1;
+    }
+    return counts.entries.map((e) => _ChartData(e.key, e.value)).toList();
+  }
+
+  List<_ChartData> _getRegistrationData(List<BikeModel> bikes) {
+    final Map<String, int> counts = {};
+    for (var bike in bikes) {
+      // Assuming 'registration_date' or similar exists, else use 'Unknown' or skip
+      // Format: YYYY-MM-DD
+      final dateStr = bike.metadata['registration_date'] as String? ?? 
+                      bike.metadata['date'] as String? ?? 
+                      'Unknown';
+      
+      // If date is ISO string, maybe parse and format to Month/Year
+      String label = dateStr;
+      try {
+        if (dateStr != 'Unknown') {
+             final date = DateTime.parse(dateStr);
+             label = DateFormat('MMM yyyy').format(date);
+        }
+      } catch (e) {
+        // ignore parse error
+      }
+
+      counts[label] = (counts[label] ?? 0) + 1;
+    }
+    
+    // Sort by date if possible, but for now just return list
+    return counts.entries.map((e) => _ChartData(e.key, e.value)).toList();
+  }
 }
 
-class _BikeCard extends StatelessWidget {
-  final BikeModel bike;
+class _MetricCard extends StatelessWidget {
+  final String title;
+  final String value;
+  final IconData icon;
+  final Color color;
 
-  const _BikeCard({required this.bike});
+  const _MetricCard({
+    required this.title,
+    required this.value,
+    required this.icon,
+    required this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: theme.dividerColor),
+        border: Border.all(color: theme.dividerColor),
       ),
-      color: theme.cardColor,
-      child: InkWell(
-        onTap: () {
-          context.goNamed('details', pathParameters: {'bikeId': bike.bikeId});
-        },
-        borderRadius: BorderRadius.circular(12),
-        hoverColor: theme.hoverColor,
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, color: color, size: 28),
+          ),
+          const SizedBox(width: 16),
+          Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: colorScheme.primary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(
-                      TablerIcons.motorbike,
-                      color: colorScheme.primary,
-                      size: 24,
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.success.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      "Active",
-                      style: AppTypography.caption.copyWith(
-                        color: AppColors.success,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const Spacer(),
               Text(
-                bike.bikeId,
-                style: AppTypography.h3.copyWith(color: colorScheme.onSurface),
+                title,
+                style: AppTypography.caption.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
               ),
               const SizedBox(height: 4),
               Text(
-                "${bike.metadata['model'] ?? 'Unknown Model'} • ${bike.metadata['color'] ?? 'Unknown Color'}",
-                style: AppTypography.body.copyWith(
-                  color: colorScheme.onSurfaceVariant,
+                value,
+                style: AppTypography.h2.copyWith(
+                  color: theme.colorScheme.onSurface,
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Text(
-                    "View Analytics",
-                    style: AppTypography.caption.copyWith(
-                      color: colorScheme.primary,
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  Icon(
-                    TablerIcons.arrow_right,
-                    size: 14,
-                    color: colorScheme.primary,
-                  ),
-                ],
               ),
             ],
           ),
-        ),
+        ],
       ),
     );
   }
+}
+
+class _ChartCard extends StatelessWidget {
+  final String title;
+  final Widget child;
+
+  const _ChartCard({required this.title, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      height: 350,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: theme.dividerColor),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: AppTypography.h3.copyWith(color: theme.colorScheme.onSurface),
+          ),
+          const SizedBox(height: 20),
+          Expanded(child: child),
+        ],
+      ),
+    );
+  }
+}
+
+class _ChartData {
+  _ChartData(this.x, this.y);
+  final String x;
+  final int y;
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
 import '../../features/presentation/layout/main_layout.dart';
+import '../../features/presentation/pages/bikes_page.dart';
 import '../../features/presentation/pages/dashboard_page.dart';
 import '../../features/presentation/pages/details_page.dart';
 
@@ -33,6 +34,11 @@ class AppRouter {
                 },
               ),
             ],
+          ),
+          GoRoute(
+            path: '/bikes',
+            name: 'bikes',
+            builder: (context, state) => const BikesPage(),
           ),
           // Add other top-level routes here that should be inside the layout
           // e.g., /bikes, /map, /analytics, /users, /settings
