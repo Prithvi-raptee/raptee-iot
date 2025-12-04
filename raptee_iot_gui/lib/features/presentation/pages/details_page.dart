@@ -13,6 +13,7 @@ import '../../../core/network/api_client.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/chart_utils.dart';
+import '../widgets/custom_error_widget.dart';
 
 class DetailsPage extends StatelessWidget {
   final String bikeId;
@@ -29,13 +30,15 @@ class DetailsPage extends StatelessWidget {
     return BlocProvider(
       create: (context) => DashboardBloc(repository: repository)
         ..add(DashboardLoadEvent(bikeId)),
-      child: const _DetailsView(),
+      child: _DetailsView(bikeId: bikeId),
     );
   }
 }
 
 class _DetailsView extends StatelessWidget {
-  const _DetailsView();
+  final String bikeId;
+
+  const _DetailsView({required this.bikeId});
 
   @override
   Widget build(BuildContext context) {
@@ -65,14 +68,12 @@ class _DetailsView extends StatelessWidget {
 
         if (state.status == DashboardStatus.failure) {
           return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(TablerIcons.alert_triangle, color: AppColors.error, size: 48),
-                const SizedBox(height: 16),
-                Text("Error loading data", style: AppTypography.h3),
-                Text(state.errorMessage ?? "Unknown error", style: AppTypography.body),
-              ],
+            child: CustomErrorWidget(
+              message: state.errorMessage ?? "Unknown error",
+              title: "Error loading data",
+              onRetry: () {
+                context.read<DashboardBloc>().add(DashboardLoadEvent(bikeId));
+              },
             ),
           );
         }

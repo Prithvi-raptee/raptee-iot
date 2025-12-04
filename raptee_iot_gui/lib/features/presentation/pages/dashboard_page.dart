@@ -11,20 +11,32 @@ import '../../data/datasources/dashboard_remote_datasource.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../data/models/bike_model.dart';
+import '../widgets/custom_error_widget.dart';
 
-class DashboardPage extends StatelessWidget {
+class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    // Dependency Injection
+  State<DashboardPage> createState() => _DashboardPageState();
+}
+
+class _DashboardPageState extends State<DashboardPage> {
+  late final DashboardRepository _repository;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize dependencies once
     final apiClient = ApiClient();
     final dataSource = DashboardRemoteDataSourceImpl(apiClient: apiClient);
-    final repository = DashboardRepository(remoteDataSource: dataSource);
+    _repository = DashboardRepository(remoteDataSource: dataSource);
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) =>
-          DashboardBloc(repository: repository)
+          DashboardBloc(repository: _repository)
             ..add(const DashboardFetchAllBikesEvent()),
       child: const _DashboardView(),
     );
@@ -38,13 +50,21 @@ class _DashboardView extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<DashboardBloc, DashboardState>(
       builder: (context, state) {
-        if (state.status == DashboardStatus.loading) {
+        // Show loading only on initial load, not on refresh if data exists
+        if (state.status == DashboardStatus.loading && state.bikes.isEmpty) {
           return const Center(child: CircularProgressIndicator());
         }
 
-        if (state.status == DashboardStatus.failure) {
+        if (state.status == DashboardStatus.failure && state.bikes.isEmpty) {
           return Center(
-            child: Text("Error loading fleet data: ${state.errorMessage}"),
+            child: CustomErrorWidget(
+              message: state.errorMessage ?? 'An unexpected error occurred',
+              onRetry: () {
+                context.read<DashboardBloc>().add(
+                  const DashboardFetchAllBikesEvent(),
+                );
+              },
+            ),
           );
         }
 
@@ -56,35 +76,55 @@ class _DashboardView extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text("Fleet Overview", style: AppTypography.h2.copyWith(color: Theme.of(context).colorScheme.onSurface)),
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      context.read<DashboardBloc>().add(
-                        const DashboardFetchAllBikesEvent(),
-                      );
-                    },
-                    icon: const Icon(TablerIcons.refresh, size: 18),
-                    label: const Text("Refresh"),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.primary,
-                      foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                      elevation: 0,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
+                  Text(
+                    "Fleet Overview",
+                    style: AppTypography.h2.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
+                  ),
+                  Row(
+                    children: [
+                      if (state.status == DashboardStatus.loading)
+                        const Padding(
+                          padding: EdgeInsets.only(right: 16.0),
+                          child: SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                        ),
+                      ElevatedButton.icon(
+                        onPressed: state.status == DashboardStatus.loading
+                            ? null
+                            : () {
+                                context.read<DashboardBloc>().add(
+                                  const DashboardFetchAllBikesEvent(),
+                                );
+                              },
+                        icon: const Icon(TablerIcons.refresh, size: 18),
+                        label: const Text("Refresh"),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Theme.of(context).colorScheme.primary,
+                          foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
               const SizedBox(height: 24),
               Expanded(
                 child: GridView.builder(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3, // Adjust based on screen size if needed
+                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                    maxCrossAxisExtent: 300, // Responsive width
                     mainAxisSpacing: 16,
                     crossAxisSpacing: 16,
                     childAspectRatio: 1.2,
@@ -138,7 +178,7 @@ class _BikeCard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: colorScheme.primary.withOpacity(0.1),
+                      color: colorScheme.primary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
@@ -153,7 +193,7 @@ class _BikeCard extends StatelessWidget {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.success.withOpacity(0.1),
+                      color: AppColors.success.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
@@ -166,11 +206,16 @@ class _BikeCard extends StatelessWidget {
                 ],
               ),
               const Spacer(),
-              Text(bike.bikeId, style: AppTypography.h3.copyWith(color: colorScheme.onSurface)),
+              Text(
+                bike.bikeId,
+                style: AppTypography.h3.copyWith(color: colorScheme.onSurface),
+              ),
               const SizedBox(height: 4),
               Text(
                 "${bike.metadata['model'] ?? 'Unknown Model'} • ${bike.metadata['color'] ?? 'Unknown Color'}",
-                style: AppTypography.body.copyWith(color: colorScheme.onSurfaceVariant),
+                style: AppTypography.body.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),

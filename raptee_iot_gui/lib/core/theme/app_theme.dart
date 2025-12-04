@@ -23,7 +23,7 @@ class AppTheme {
         onSecondary: AppColors.textInverse,
         onSurface: AppColors.textPrimary,
         onSurfaceVariant: AppColors.textSecondary,
-        onError: AppColors.textPrimary,
+        onError: AppColors.textInverse, // Visible on error background
       ),
 
       // Text Theme
@@ -108,7 +108,7 @@ class AppTheme {
         onSecondary: AppColors.textInverseLight,
         onSurface: AppColors.textPrimaryLight,
         onSurfaceVariant: AppColors.textSecondaryLight,
-        onError: AppColors.textPrimaryLight,
+        onError: AppColors.textInverseLight, // Visible on error background
       ),
 
       // Text Theme

@@ -7,7 +7,7 @@ class AppConstants {
   static const int connectTimeout = 15000;
   static const int refreshRateMs = 5000;
 
-  // UI ConfigapiBaseUrl
+  // UI Config
   static const double sidebarWidth = 250.0;
   static const double defaultPadding = 16.0;
   static const double cardRadius = 8.0;
