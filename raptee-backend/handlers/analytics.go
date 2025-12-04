@@ -20,6 +20,16 @@ type AnalyticsResponse struct {
 	APIStats     []APIStat              `json:"api_stats"`
 	Connectivity ConnectivityStats      `json:"connectivity_stats"`
 	Failures     []FailureIncident      `json:"failures"`
+	TimeSeries   []TimeSeriesPoint      `json:"time_series"`
+}
+
+type TimeSeriesPoint struct {
+	Timestamp       string `json:"timestamp"`
+	Latency         int    `json:"latency"`
+	APIName         string `json:"api_name"`
+	Status          int    `json:"status"`
+	SignalStrength  int    `json:"signal_strength"`
+	ConnectionState string `json:"connection_state"`
 }
 
 type AnalyticsSummary struct {
@@ -104,6 +114,7 @@ func HandleGetAnalytics(c *gin.Context) {
 
 	// Failures list
 	var failures []FailureIncident
+	var timeSeries []TimeSeriesPoint
 
 	for rows.Next() {
 		var loggedAt interface{} // Use interface to handle time scanning if needed, or just time.Time
@@ -252,6 +263,25 @@ func HandleGetAnalytics(c *gin.Context) {
 			summary.StartTime = tsStr
 		}
 		summary.EndTime = tsStr
+
+		// Populate TimeSeries
+		// Normalize Signal Strength
+		sigStrength := 0
+		switch v := p.SignalStrength.(type) {
+		case float64:
+			sigStrength = int(v)
+		case int:
+			sigStrength = v
+		}
+
+		timeSeries = append(timeSeries, TimeSeriesPoint{
+			Timestamp:       tsStr,
+			Latency:         latency,
+			APIName:         apiName,
+			Status:          statusCode,
+			SignalStrength:  sigStrength,
+			ConnectionState: connState,
+		})
 	}
 
 	// --- Final Calculations ---
@@ -341,6 +371,7 @@ func HandleGetAnalytics(c *gin.Context) {
 		APIStats:     apiStats,
 		Connectivity: connStats,
 		Failures:     failures,
+		TimeSeries:   timeSeries,
 	}
 
 	c.JSON(http.StatusOK, resp)
