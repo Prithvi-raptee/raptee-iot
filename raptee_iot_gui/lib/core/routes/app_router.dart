@@ -1,5 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../features/data/datasources/dashboard_remote_datasource.dart';
+import '../../features/data/repositories/dashboard_repository.dart';
+import '../../features/presentation/bloc/dashboard_bloc.dart';
+import '../../features/presentation/bloc/dashboard_event.dart';
+import '../../core/network/api_client.dart';
 import '../../features/presentation/layout/main_layout.dart';
 import '../../features/presentation/pages/bikes_page.dart';
 import '../../features/presentation/pages/dashboard_page.dart';
@@ -18,7 +24,19 @@ class AppRouter {
       ShellRoute(
         navigatorKey: _shellNavigatorKey,
         builder: (context, state, child) {
-          return MainLayout(child: child);
+          // Initialize dependencies here (or use DI container like GetIt)
+          final apiClient = ApiClient();
+          final dataSource = DashboardRemoteDataSourceImpl(apiClient: apiClient);
+          final repository = DashboardRepository(remoteDataSource: dataSource);
+
+          return RepositoryProvider(
+            create: (context) => repository,
+            child: BlocProvider(
+              create: (context) => DashboardBloc(repository: repository)
+                ..add(const DashboardFetchAllBikesEvent()),
+              child: MainLayout(child: child),
+            ),
+          );
         },
         routes: [
           GoRoute(

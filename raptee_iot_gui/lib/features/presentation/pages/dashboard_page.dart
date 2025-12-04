@@ -15,32 +15,12 @@ import '../widgets/custom_error_widget.dart';
 import '../../data/models/bike_model.dart';
 import '../../../core/widgets/confirmation_dialog.dart';
 
-class DashboardPage extends StatefulWidget {
+class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key});
 
   @override
-  State<DashboardPage> createState() => _DashboardPageState();
-}
-
-class _DashboardPageState extends State<DashboardPage> {
-  late final DashboardRepository _repository;
-
-  @override
-  void initState() {
-    super.initState();
-    final apiClient = ApiClient();
-    final dataSource = DashboardRemoteDataSourceImpl(apiClient: apiClient);
-    _repository = DashboardRepository(remoteDataSource: dataSource);
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) =>
-          DashboardBloc(repository: _repository)
-            ..add(const DashboardFetchAllBikesEvent()),
-      child: const _DashboardAnalyticsView(),
-    );
+    return const _DashboardAnalyticsView();
   }
 }
 

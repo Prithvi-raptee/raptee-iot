@@ -13,34 +13,12 @@ import '../../../core/theme/app_typography.dart';
 import '../../data/models/bike_model.dart';
 import '../widgets/custom_error_widget.dart';
 
-class BikesPage extends StatefulWidget {
+class BikesPage extends StatelessWidget {
   const BikesPage({super.key});
 
   @override
-  State<BikesPage> createState() => _BikesPageState();
-}
-
-class _BikesPageState extends State<BikesPage> {
-  late final DashboardRepository _repository;
-
-  @override
-  void initState() {
-    super.initState();
-    // Initialize dependencies once
-    // TODO: Ideally this should be provided via DI (GetIt/Provider)
-    final apiClient = ApiClient();
-    final dataSource = DashboardRemoteDataSourceImpl(apiClient: apiClient);
-    _repository = DashboardRepository(remoteDataSource: dataSource);
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) =>
-          DashboardBloc(repository: _repository)
-            ..add(const DashboardFetchAllBikesEvent()),
-      child: const _BikesView(),
-    );
+    return const _BikesView();
   }
 }
 
