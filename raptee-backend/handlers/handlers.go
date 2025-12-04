@@ -16,6 +16,10 @@ import (
 
 // --- WRITE HANDLER ---
 
+type DeleteRequest struct {
+	BikeIDs []string `json:"bike_ids"`
+}
+
 func HandleSync(c *gin.Context) {
 	var req models.CompactRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -277,6 +281,55 @@ func HandleRead(c *gin.Context) {
 
 // --- DELETE HANDLERS ---
 
+func HandleDeleteBikes(c *gin.Context) {
+	// 1. Check for JSON Body (Bulk Delete)
+	var req DeleteRequest
+	if err := c.ShouldBindJSON(&req); err == nil && len(req.BikeIDs) > 0 {
+		// Bulk Delete
+		// Use ANY($1) to match any ID in the list
+		res, err := db.Pool.Exec(context.Background(), "DELETE FROM bikes WHERE bike_id = ANY($1)", req.BikeIDs)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete bikes: " + err.Error()})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"status": "deleted", "count": res.RowsAffected()})
+		return
+	}
+
+	// 2. Fallback to Query Param (Single Delete)
+	// This maintains backward compatibility if needed, or we can just enforce JSON for this new endpoint.
+	// Since this is a NEW endpoint (/api/v1/bikes DELETE), we can strictly require JSON or support query param too.
+	// Let's support query param for consistency with other endpoints if desired, but the plan focused on bulk.
+	// However, the previous HandleDeleteBike was on /api/v1/provision.
+	// The user asked for "delete the telemetry or bikes in BULK".
+	// So for this NEW endpoint, let's support both for flexibility.
+	
+	bikeID := c.Query("bike_id")
+	if bikeID != "" {
+		res, err := db.Pool.Exec(context.Background(), "DELETE FROM bikes WHERE bike_id = $1", bikeID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete bike: " + err.Error()})
+			return
+		}
+		if res.RowsAffected() == 0 {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Bike not found"})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"status": "deleted", "bike_id": bikeID})
+		return
+	}
+
+	c.JSON(http.StatusBadRequest, gin.H{"error": "bike_id query param or bike_ids json body required"})
+}
+
+// Deprecated: Use HandleDeleteBikes instead for better REST semantics, but keeping for compatibility if needed.
+// Actually, the plan says "Add DELETE /api/v1/bikes". The existing "HandleDeleteBike" was mapped to DELETE /api/v1/provision.
+// We should probably keep HandleDeleteBike as is or redirect it?
+// The user wants efficient code. Let's keep HandleDeleteBike for the old endpoint but maybe reuse logic?
+// For now, I will leave HandleDeleteBike as is (it's for /api/v1/provision) and add HandleDeleteBikes for /api/v1/bikes.
+// Wait, the user said "edit the @[raptee-backend]".
+// I will just ADD HandleDeleteBikes and UPDATE HandleDeleteTelemetry.
+
 func HandleDeleteBike(c *gin.Context) {
 	bikeID := c.Query("bike_id")
 	if bikeID == "" {
@@ -300,9 +353,23 @@ func HandleDeleteBike(c *gin.Context) {
 }
 
 func HandleDeleteTelemetry(c *gin.Context) {
+	// 1. Check for JSON Body (Bulk Delete by Bike IDs)
+	var req DeleteRequest
+	if err := c.ShouldBindJSON(&req); err == nil && len(req.BikeIDs) > 0 {
+		// Delete ALL telemetry for these bikes
+		res, err := db.Pool.Exec(context.Background(), "DELETE FROM telemetry_logs WHERE bike_id = ANY($1)", req.BikeIDs)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete telemetry: " + err.Error()})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"status": "deleted", "count": res.RowsAffected()})
+		return
+	}
+
+	// 2. Fallback to Query Param (Single Bike Delete)
 	bikeID := c.Query("bike_id")
 	if bikeID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "bike_id is required"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "bike_id query param or bike_ids json body required"})
 		return
 	}
 

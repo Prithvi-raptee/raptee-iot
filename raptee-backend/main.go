@@ -31,8 +31,9 @@ func main() {
 	r.POST("/api/v1/provision", handlers.HandleProvision) // Provision/Update Bike
 	r.GET("/api/v1/bikes", handlers.HandleListBikes)      // List All Bikes
 	r.GET("/api/v1/telemetry", handlers.HandleRead)       // Read Pagination
+	r.DELETE("/api/v1/bikes", handlers.HandleDeleteBikes) // Delete Bikes (Bulk/Single)
 	r.DELETE("/api/v1/provision", handlers.HandleDeleteBike) // Delete Bike
-	r.DELETE("/api/v1/telemetry", handlers.HandleDeleteTelemetry) // Delete Telemetry
+	r.DELETE("/api/v1/telemetry", handlers.HandleDeleteTelemetry) // Delete Telemetry (For Bulk/Single bikes )
 
 	// 4. Start Server (AWS App Runner defaults to Port 8080)
 	port := os.Getenv("PORT")
