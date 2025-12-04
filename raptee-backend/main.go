@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	"raptee-backend/db"
 	"raptee-backend/handlers"
 )
@@ -12,6 +13,9 @@ import (
 // --- MAIN FUNCTION ---
 
 func main() {
+	// Load .env file and force override existing env vars
+	_ = godotenv.Overload()
+
 	// 1. Database Connection & Schema Loading
 	db.Init()
 	defer db.Pool.Close()
@@ -26,6 +30,7 @@ func main() {
 	r.Use(cors.New(config))
 
 	// 3. Endpoints
+	r.GET("/api/v1/analytics", handlers.HandleGetAnalytics) // Get Analytics
 	r.GET("/health", func(c *gin.Context) { c.JSON(200, gin.H{"status": "ok"}) })
 	r.POST("/api/v1/sync", handlers.HandleSync)           // Write Ingestion
 	r.POST("/api/v1/provision", handlers.HandleProvision) // Provision/Update Bike
