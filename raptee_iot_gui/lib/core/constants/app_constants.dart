@@ -4,6 +4,7 @@ class AppConstants {
   
   // API Config
   static const String apiBaseUrl = "https://n4gzvnxn5h.ap-south-1.awsapprunner.com/api/v1";
+  // App Config
   static const int connectTimeout = 15000;
   static const int refreshRateMs = 5000;
 
@@ -11,6 +12,12 @@ class AppConstants {
   static const double sidebarWidth = 250.0;
   static const double defaultPadding = 16.0;
   static const double cardRadius = 8.0;
+
+  // Map Config
+  static const String lightTileLayerUrlTemplate =
+      'https://a.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}.png';
+  static const String darkTileLayerUrlTemplate =
+      'https://a.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png';
 }
 
 // Strict Types for your data
