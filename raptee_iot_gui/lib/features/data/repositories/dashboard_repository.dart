@@ -52,7 +52,15 @@ class DashboardRepository {
     await remoteDataSource.deleteBike(bikeId);
   }
 
+  Future<void> deleteBikes(List<String> bikeIds) async {
+    await remoteDataSource.deleteBikes(bikeIds);
+  }
+
   Future<void> deleteTelemetry(String bikeId) async {
     await remoteDataSource.deleteTelemetry(bikeId);
+  }
+
+  Future<void> deleteTelemetryBulk(List<String> bikeIds) async {
+    await remoteDataSource.deleteTelemetryBulk(bikeIds);
   }
 }

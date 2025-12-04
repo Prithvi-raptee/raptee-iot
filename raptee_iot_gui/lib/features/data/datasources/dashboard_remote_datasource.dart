@@ -6,7 +6,9 @@ abstract class DashboardRemoteDataSource {
   Future<TelemetryResponse> getTelemetry(String bikeId, {String? cursor});
   Future<BikeListResponse> getBikes({String? cursor, int limit = 50});
   Future<void> deleteBike(String bikeId);
+  Future<void> deleteBikes(List<String> bikeIds);
   Future<void> deleteTelemetry(String bikeId);
+  Future<void> deleteTelemetryBulk(List<String> bikeIds);
 }
 
 class DashboardRemoteDataSourceImpl implements DashboardRemoteDataSource {
@@ -43,7 +45,17 @@ class DashboardRemoteDataSourceImpl implements DashboardRemoteDataSource {
   }
 
   @override
+  Future<void> deleteBikes(List<String> bikeIds) async {
+    await apiClient.delete('/bikes', data: {'bike_ids': bikeIds});
+  }
+
+  @override
   Future<void> deleteTelemetry(String bikeId) async {
     await apiClient.delete('/telemetry', queryParameters: {'bike_id': bikeId});
+  }
+
+  @override
+  Future<void> deleteTelemetryBulk(List<String> bikeIds) async {
+    await apiClient.delete('/telemetry', data: {'bike_ids': bikeIds});
   }
 }

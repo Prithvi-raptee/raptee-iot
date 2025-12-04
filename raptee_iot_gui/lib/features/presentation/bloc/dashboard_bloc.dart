@@ -11,6 +11,8 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     on<DashboardLoadMoreEvent>(_onLoadMore);
     on<DashboardDeleteBikeEvent>(_onDeleteBike);
     on<DashboardDeleteTelemetryEvent>(_onDeleteTelemetry);
+    on<DashboardDeleteBikesEvent>(_onDeleteBikes);
+    on<DashboardDeleteTelemetryBulkEvent>(_onDeleteTelemetryBulk);
     on<DashboardFetchAllBikesEvent>(_onFetchAllBikes);
   }
 
@@ -85,6 +87,34 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
       emit(state.copyWith(
         status: DashboardStatus.failure,
         errorMessage: e.toString(),
+      ));
+    }
+  }
+
+  Future<void> _onDeleteBikes(DashboardDeleteBikesEvent event, Emitter<DashboardState> emit) async {
+    emit(state.copyWith(deleteStatus: DeleteStatus.deleting));
+    try {
+      await repository.deleteBikes(event.bikeIds);
+      add(const DashboardFetchAllBikesEvent()); // Reload list
+      emit(state.copyWith(deleteStatus: DeleteStatus.success));
+    } catch (e) {
+      emit(state.copyWith(
+        deleteStatus: DeleteStatus.failure,
+        errorMessage: "Failed to delete bikes: $e",
+      ));
+    }
+  }
+
+  Future<void> _onDeleteTelemetryBulk(DashboardDeleteTelemetryBulkEvent event, Emitter<DashboardState> emit) async {
+    emit(state.copyWith(deleteStatus: DeleteStatus.deleting));
+    try {
+      await repository.deleteTelemetryBulk(event.bikeIds);
+      // No need to reload list as bikes are still there, but maybe show success message
+      emit(state.copyWith(deleteStatus: DeleteStatus.success));
+    } catch (e) {
+      emit(state.copyWith(
+        deleteStatus: DeleteStatus.failure,
+        errorMessage: "Failed to delete telemetry: $e",
       ));
     }
   }

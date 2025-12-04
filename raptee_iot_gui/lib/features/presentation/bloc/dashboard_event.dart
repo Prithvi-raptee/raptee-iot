@@ -35,6 +35,22 @@ class DashboardDeleteTelemetryEvent extends DashboardEvent {
   List<Object> get props => [bikeId];
 }
 
+class DashboardDeleteBikesEvent extends DashboardEvent {
+  final List<String> bikeIds;
+  const DashboardDeleteBikesEvent(this.bikeIds);
+
+  @override
+  List<Object> get props => [bikeIds];
+}
+
+class DashboardDeleteTelemetryBulkEvent extends DashboardEvent {
+  final List<String> bikeIds;
+  const DashboardDeleteTelemetryBulkEvent(this.bikeIds);
+
+  @override
+  List<Object> get props => [bikeIds];
+}
+
 class DashboardFetchAllBikesEvent extends DashboardEvent {
   const DashboardFetchAllBikesEvent();
 }
