@@ -18,6 +18,7 @@ import '../widgets/custom_error_widget.dart';
 import '../widgets/stat_card.dart';
 import '../widgets/chart_card.dart';
 import '../widgets/api_stats_table.dart';
+import '../../../core/widgets/confirmation_dialog.dart';
 
 class DetailsPage extends StatelessWidget {
   final String bikeId;
@@ -1101,6 +1102,8 @@ class _DetailsViewState extends State<_DetailsView> {
 
   Widget _buildActions(BuildContext context, DashboardState state) {
     final theme = Theme.of(context);
+    final hasTelemetry = (state.analytics?.summary.totalCalls ?? 0) > 0;
+
     return PopupMenuButton<String>(
       icon: Icon(
         TablerIcons.dots_vertical,
@@ -1113,47 +1116,81 @@ class _DetailsViewState extends State<_DetailsView> {
       ),
       onSelected: (value) {
         if (value == 'delete_telemetry') {
-          context.read<DashboardBloc>().add(
-            DashboardDeleteTelemetryEvent(state.bikeId),
+          ConfirmationDialog.show(
+            context: context,
+            title: 'Delete Telemetry',
+            content:
+                'Are you sure you want to delete all telemetry data for this bike? This action cannot be undone.',
+            confirmText: 'Delete',
+            isDangerous: true,
+            onConfirm: () {
+              context.read<DashboardBloc>().add(
+                DashboardDeleteTelemetryEvent(state.bikeId),
+              );
+            },
           );
         } else if (value == 'delete_bike') {
-          context.read<DashboardBloc>().add(
-            DashboardDeleteBikeEvent(state.bikeId),
+          ConfirmationDialog.show(
+            context: context,
+            title: 'Delete Bike',
+            content:
+                'Are you sure you want to delete this bike? This action cannot be undone.',
+            confirmText: 'Delete',
+            isDangerous: true,
+            onConfirm: () {
+              context.read<DashboardBloc>().add(
+                DashboardDeleteBikeEvent(state.bikeId),
+              );
+            },
           );
         }
       },
-      itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-        PopupMenuItem<String>(
-          value: 'delete_telemetry',
-          child: Row(
-            children: [
-              const Icon(TablerIcons.trash, size: 18, color: AppColors.warning),
-              const SizedBox(width: 12),
-              Text(
-                'Delete Telemetry',
-                style: AppTypography.body.copyWith(
-                  color: theme.colorScheme.onSurface,
-                ),
+      itemBuilder:
+          (BuildContext context) => <PopupMenuEntry<String>>[
+            PopupMenuItem<String>(
+              value: 'delete_telemetry',
+              enabled: hasTelemetry,
+              child: Row(
+                children: [
+                  Icon(
+                    TablerIcons.trash,
+                    size: 18,
+                    color:
+                        hasTelemetry ? AppColors.warning : theme.disabledColor,
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Delete Telemetry',
+                    style: AppTypography.body.copyWith(
+                      color:
+                          hasTelemetry
+                              ? theme.colorScheme.onSurface
+                              : theme.disabledColor,
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
-        PopupMenuItem<String>(
-          value: 'delete_bike',
-          child: Row(
-            children: [
-              const Icon(TablerIcons.trash_x, size: 18, color: AppColors.error),
-              const SizedBox(width: 12),
-              Text(
-                'Delete Bike',
-                style: AppTypography.body.copyWith(
-                  color: theme.colorScheme.onSurface,
-                ),
+            ),
+            PopupMenuItem<String>(
+              value: 'delete_bike',
+              child: Row(
+                children: [
+                  const Icon(
+                    TablerIcons.trash_x,
+                    size: 18,
+                    color: AppColors.error,
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Delete Bike',
+                    style: AppTypography.body.copyWith(
+                      color: theme.colorScheme.onSurface,
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
-      ],
+            ),
+          ],
     );
   }
 
