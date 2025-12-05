@@ -15,6 +15,9 @@ import '../../../core/theme/app_typography.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/chart_utils.dart';
 import '../widgets/custom_error_widget.dart';
+import '../widgets/stat_card.dart';
+import '../widgets/chart_card.dart';
+import '../widgets/api_stats_table.dart';
 
 class DetailsPage extends StatelessWidget {
   final String bikeId;
@@ -92,63 +95,130 @@ class _DetailsViewState extends State<_DetailsView> {
 
         return Scaffold(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          body: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildHeader(context, state),
-                const SizedBox(height: 24),
-                _buildToggle(),
-                const SizedBox(height: 24),
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildSummaryCards(context, analytics.summary),
-                        const SizedBox(height: 32),
-
-                        _buildSectionTitle("Failure & High Latency Analysis"),
-                        _buildFailureAnalysis(context, analytics.failures),
-                        const SizedBox(height: 32),
-
-                        _buildSectionTitle(
-                          "Latency Percentiles (Success Only)",
-                        ),
-                        _buildPercentilesChart(context, analytics.apiStats),
-                        const SizedBox(height: 32),
-
-                        _buildSectionTitle("Cellular Connectivity Overview"),
-                        _buildConnectivityOverview(
-                          context,
-                          analytics.connectivity,
-                        ),
-                        const SizedBox(height: 32),
-
-                        _buildSectionTitle("Cellular Signal & Latency"),
-                        _buildSignalAnalysis(
-                          context,
-                          analytics.timeSeries,
-                          analytics.connectivity,
-                        ),
-                        const SizedBox(height: 32),
-
-                        _buildSectionTitle(
-                          "General API Analysis (${_showSuccessOnly ? 'Success Only' : 'All Data'})",
-                        ),
-                        _buildGeneralApiAnalysis(context, analytics.timeSeries),
-                        const SizedBox(height: 32),
-
-                        _buildSectionTitle("API Performance Statistics"),
-                        _buildApiStatsTable(context, analytics.apiStats),
-                        const SizedBox(height: 48),
-                      ],
+          body: CustomScrollView(
+            slivers: [
+              SliverAppBar(
+                floating: true,
+                snap: true,
+                pinned: false,
+                backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                elevation: 0,
+                leading: IconButton(
+                  icon: Icon(
+                    TablerIcons.arrow_left,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                  onPressed: () {
+                    if (context.canPop()) {
+                      context.pop();
+                    } else {
+                      context.goNamed('dashboard');
+                    }
+                  },
+                ),
+                title: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Analytics Dashboard",
+                      style: AppTypography.caption.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    Text(
+                      state.bikeId,
+                      style: AppTypography.h2.copyWith(
+                        color: Theme.of(context).colorScheme.onSurface,
+                        fontSize: 20,
+                      ),
+                    ),
+                  ],
+                ),
+                actions: [
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      final currentState = context.read<DashboardBloc>().state;
+                      if (currentState.bikeId.isNotEmpty) {
+                        context.read<DashboardBloc>().add(
+                          DashboardLoadEvent(currentState.bikeId),
+                        );
+                      }
+                    },
+                    icon: const Icon(TablerIcons.refresh, size: 18),
+                    label: const Text("Refresh"),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.surface,
+                      foregroundColor: Theme.of(context).colorScheme.onSurface,
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        side: BorderSide(color: Theme.of(context).dividerColor),
+                      ),
                     ),
                   ),
+                  const SizedBox(width: 12),
+                  _buildActions(context, state),
+                  const SizedBox(width: 16),
+                ],
+                bottom: PreferredSize(
+                  preferredSize: const Size.fromHeight(60),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
+                    child: _buildToggle(),
+                  ),
                 ),
-              ],
-            ),
+              ),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildSummaryCards(context, analytics.summary),
+                      const SizedBox(height: 32),
+
+                      _buildSectionTitle("Failure & High Latency Analysis"),
+                      _buildFailureAnalysis(context, analytics.failures),
+                      const SizedBox(height: 32),
+
+                      _buildSectionTitle("Latency Percentiles (Success Only)"),
+                      _buildPercentilesChart(context, analytics.apiStats),
+                      const SizedBox(height: 32),
+
+                      _buildSectionTitle("Cellular Connectivity Overview"),
+                      _buildConnectivityOverview(
+                        context,
+                        analytics.connectivity,
+                      ),
+                      const SizedBox(height: 32),
+
+                      _buildSectionTitle("Cellular Signal & Latency"),
+                      _buildSignalAnalysis(
+                        context,
+                        analytics.timeSeries,
+                        analytics.connectivity,
+                      ),
+                      const SizedBox(height: 32),
+
+                      _buildSectionTitle(
+                        "General API Analysis (${_showSuccessOnly ? 'Success Only' : 'All Data'})",
+                      ),
+                      _buildGeneralApiAnalysis(context, analytics.timeSeries),
+                      const SizedBox(height: 32),
+
+                      _buildSectionTitle("API Performance Statistics"),
+                      ApiStatsTable(apiStats: analytics.apiStats),
+                      const SizedBox(height: 48),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
         );
       },
@@ -216,10 +286,10 @@ class _DetailsViewState extends State<_DetailsView> {
         Row(
           children: [
             Expanded(
-              child: _buildChartContainer(
-                context,
-                "Incident Count per API",
-                SfCartesianChart(
+              child: ChartCard(
+                title: "Incident Count per API",
+                height: 700,
+                child: SfCartesianChart(
                   plotAreaBorderWidth: 0,
                   primaryXAxis: CategoryAxis(
                     majorGridLines: const MajorGridLines(width: 0),
@@ -239,7 +309,9 @@ class _DetailsViewState extends State<_DetailsView> {
                     canShowMarker: false,
                     format: 'point.x : point.y',
                     color: Theme.of(context).colorScheme.surface,
-                    textStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                    textStyle: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
                     shadowColor: Colors.black26,
                     elevation: 5,
                   ),
@@ -263,10 +335,10 @@ class _DetailsViewState extends State<_DetailsView> {
             ),
             const SizedBox(width: 24),
             Expanded(
-              child: _buildChartContainer(
-                context,
-                "Incident Timeline",
-                SfCartesianChart(
+              child: ChartCard(
+                title: "Incident Timeline",
+                height: 700,
+                child: SfCartesianChart(
                   plotAreaBorderWidth: 0,
                   primaryXAxis: DateTimeAxis(
                     dateFormat: DateFormat.Hm(),
@@ -297,7 +369,9 @@ class _DetailsViewState extends State<_DetailsView> {
                   tooltipBehavior: TooltipBehavior(
                     enable: true,
                     color: Theme.of(context).colorScheme.surface,
-                    textStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                    textStyle: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
                     shadowColor: Colors.black26,
                     elevation: 5,
                   ),
@@ -339,10 +413,10 @@ class _DetailsViewState extends State<_DetailsView> {
 
   // --- 2. Percentiles ---
   Widget _buildPercentilesChart(BuildContext context, List<APIStat> stats) {
-    return _buildChartContainer(
-      context,
-      "Latency Percentiles (ms)",
-      SfCartesianChart(
+    return ChartCard(
+      title: "Latency Percentiles (ms)",
+      height: 700,
+      child: SfCartesianChart(
         plotAreaBorderWidth: 0,
         primaryXAxis: CategoryAxis(
           labelRotation: -45,
@@ -367,7 +441,9 @@ class _DetailsViewState extends State<_DetailsView> {
           activationMode: ActivationMode.singleTap,
           tooltipSettings: InteractiveTooltip(
             color: Theme.of(context).colorScheme.surface,
-            textStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+            textStyle: TextStyle(
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
             borderColor: Theme.of(context).dividerColor,
             borderWidth: 1,
           ),
@@ -448,10 +524,10 @@ class _DetailsViewState extends State<_DetailsView> {
             const SizedBox(width: 24),
             Expanded(
               flex: 2,
-              child: _buildChartContainer(
-                context,
-                "Connection State Distribution",
-                SfCircularChart(
+              child: ChartCard(
+                title: "Connection State Distribution",
+                height: 700,
+                child: SfCircularChart(
                   legend: Legend(
                     isVisible: true,
                     overflowMode: LegendItemOverflowMode.wrap,
@@ -460,7 +536,9 @@ class _DetailsViewState extends State<_DetailsView> {
                   tooltipBehavior: TooltipBehavior(
                     enable: true,
                     color: Theme.of(context).colorScheme.surface,
-                    textStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                    textStyle: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
                     shadowColor: Colors.black26,
                     elevation: 5,
                   ),
@@ -489,10 +567,10 @@ class _DetailsViewState extends State<_DetailsView> {
         Row(
           children: [
             Expanded(
-              child: _buildChartContainer(
-                context,
-                "Failure Rate by State (%)",
-                SfCartesianChart(
+              child: ChartCard(
+                title: "Failure Rate by State (%)",
+                height: 700,
+                child: SfCartesianChart(
                   plotAreaBorderWidth: 0,
                   primaryXAxis: CategoryAxis(
                     majorGridLines: const MajorGridLines(width: 0),
@@ -509,7 +587,9 @@ class _DetailsViewState extends State<_DetailsView> {
                   tooltipBehavior: TooltipBehavior(
                     enable: true,
                     color: Theme.of(context).colorScheme.surface,
-                    textStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                    textStyle: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
                     shadowColor: Colors.black26,
                     elevation: 5,
                   ),
@@ -532,10 +612,10 @@ class _DetailsViewState extends State<_DetailsView> {
             ),
             const SizedBox(width: 24),
             Expanded(
-              child: _buildChartContainer(
-                context,
-                "Latency Dist by State",
-                SfCartesianChart(
+              child: ChartCard(
+                title: "Latency Dist by State",
+                height: 700,
+                child: SfCartesianChart(
                   plotAreaBorderWidth: 0,
                   primaryXAxis: CategoryAxis(
                     majorGridLines: const MajorGridLines(width: 0),
@@ -553,7 +633,9 @@ class _DetailsViewState extends State<_DetailsView> {
                   tooltipBehavior: TooltipBehavior(
                     enable: true,
                     color: Theme.of(context).colorScheme.surface,
-                    textStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                    textStyle: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
                     shadowColor: Colors.black26,
                     elevation: 5,
                   ),
@@ -583,10 +665,10 @@ class _DetailsViewState extends State<_DetailsView> {
   ) {
     final validSignal = timeSeries.where((t) => t.signalStrength > 0).toList();
 
-    return _buildChartContainer(
-      context,
-      "Signal Strength vs Latency",
-      SfCartesianChart(
+    return ChartCard(
+      title: "Signal Strength vs Latency",
+      height: 700,
+      child: SfCartesianChart(
         plotAreaBorderWidth: 0,
         primaryXAxis: NumericAxis(
           title: AxisTitle(text: 'Signal Strength (%)'),
@@ -622,10 +704,7 @@ class _DetailsViewState extends State<_DetailsView> {
             pointColorMapper: (t, _) =>
                 t.connectionState == 'WiFi' ? Colors.blue : Colors.green,
             name: 'Calls',
-            markerSettings: const MarkerSettings(
-              height: 8,
-              width: 8,
-            ),
+            markerSettings: const MarkerSettings(height: 8, width: 8),
             animationDuration: 500,
           ),
         ],
@@ -695,10 +774,10 @@ class _DetailsViewState extends State<_DetailsView> {
         Row(
           children: [
             Expanded(
-              child: _buildChartContainer(
-                context,
-                "Latency Distribution",
-                SfCartesianChart(
+              child: ChartCard(
+                title: "Latency Distribution",
+                height: 700,
+                child: SfCartesianChart(
                   plotAreaBorderWidth: 0,
                   primaryXAxis: CategoryAxis(
                     labelRotation: -45,
@@ -717,7 +796,9 @@ class _DetailsViewState extends State<_DetailsView> {
                   tooltipBehavior: TooltipBehavior(
                     enable: true,
                     color: Theme.of(context).colorScheme.surface,
-                    textStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                    textStyle: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
                     shadowColor: Colors.black26,
                     elevation: 5,
                   ),
@@ -735,10 +816,10 @@ class _DetailsViewState extends State<_DetailsView> {
             ),
             const SizedBox(width: 24),
             Expanded(
-              child: _buildChartContainer(
-                context,
-                "Latency Over Time",
-                SfCartesianChart(
+              child: ChartCard(
+                title: "Latency Over Time",
+                height: 700,
+                child: SfCartesianChart(
                   plotAreaBorderWidth: 0,
                   primaryXAxis: DateTimeAxis(
                     dateFormat: DateFormat.Hms(),
@@ -757,7 +838,9 @@ class _DetailsViewState extends State<_DetailsView> {
                   tooltipBehavior: TooltipBehavior(
                     enable: true,
                     color: Theme.of(context).colorScheme.surface,
-                    textStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                    textStyle: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
                     shadowColor: Colors.black26,
                     elevation: 5,
                   ),
@@ -766,7 +849,9 @@ class _DetailsViewState extends State<_DetailsView> {
                     activationMode: ActivationMode.singleTap,
                     tooltipSettings: InteractiveTooltip(
                       color: Theme.of(context).colorScheme.surface,
-                      textStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                      textStyle: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
                       borderColor: Theme.of(context).dividerColor,
                       borderWidth: 1,
                     ),
@@ -793,10 +878,10 @@ class _DetailsViewState extends State<_DetailsView> {
         Row(
           children: [
             Expanded(
-              child: _buildChartContainer(
-                context,
-                "Average Latency",
-                SfCartesianChart(
+              child: ChartCard(
+                title: "Average Latency",
+                height: 700,
+                child: SfCartesianChart(
                   plotAreaBorderWidth: 0,
                   primaryXAxis: CategoryAxis(
                     labelRotation: -45,
@@ -814,7 +899,9 @@ class _DetailsViewState extends State<_DetailsView> {
                   tooltipBehavior: TooltipBehavior(
                     enable: true,
                     color: Theme.of(context).colorScheme.surface,
-                    textStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                    textStyle: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
                     shadowColor: Colors.black26,
                     elevation: 5,
                   ),
@@ -823,7 +910,9 @@ class _DetailsViewState extends State<_DetailsView> {
                       dataSource: avgData,
                       xValueMapper: (d, _) => d.x,
                       yValueMapper: (d, _) => d.y,
-                      borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(4),
+                      ),
                       dataLabelSettings: const DataLabelSettings(
                         isVisible: true,
                         labelAlignment: ChartDataLabelAlignment.outer,
@@ -837,10 +926,10 @@ class _DetailsViewState extends State<_DetailsView> {
             ),
             const SizedBox(width: 24),
             Expanded(
-              child: _buildChartContainer(
-                context,
-                "Status Code Dist (All Data)",
-                SfCartesianChart(
+              child: ChartCard(
+                title: "Status Code Dist (All Data)",
+                height: 700,
+                child: SfCartesianChart(
                   plotAreaBorderWidth: 0,
                   primaryXAxis: CategoryAxis(
                     labelRotation: -45,
@@ -863,7 +952,9 @@ class _DetailsViewState extends State<_DetailsView> {
                   tooltipBehavior: TooltipBehavior(
                     enable: true,
                     color: Theme.of(context).colorScheme.surface,
-                    textStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                    textStyle: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
                     shadowColor: Colors.black26,
                     elevation: 5,
                   ),
@@ -940,7 +1031,8 @@ class _DetailsViewState extends State<_DetailsView> {
         children: [
           Text(
             title,
-            style: AppTypography.h3.copyWith( // Larger title
+            style: AppTypography.h3.copyWith(
+              // Larger title
               color: theme.colorScheme.onSurface,
               fontWeight: FontWeight.w600,
             ),
@@ -1007,74 +1099,6 @@ class _DetailsViewState extends State<_DetailsView> {
     );
   }
 
-  Widget _buildHeader(BuildContext context, DashboardState state) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Row(
-          children: [
-            IconButton(
-              icon: Icon(
-                TablerIcons.arrow_left,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-              onPressed: () => context.goNamed('dashboard'),
-            ),
-            const SizedBox(width: 8),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Analytics Dashboard",
-                  style: AppTypography.caption.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                Text(
-                  state.bikeId,
-                  style: AppTypography.h2.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-        Row(
-          children: [
-            ElevatedButton.icon(
-              onPressed: () {
-                final currentState = context.read<DashboardBloc>().state;
-                if (currentState.bikeId.isNotEmpty) {
-                  context.read<DashboardBloc>().add(
-                    DashboardLoadEvent(currentState.bikeId),
-                  );
-                }
-              },
-              icon: const Icon(TablerIcons.refresh, size: 18),
-              label: const Text("Refresh"),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(context).colorScheme.surface,
-                foregroundColor: Theme.of(context).colorScheme.onSurface,
-                elevation: 0,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  side: BorderSide(color: Theme.of(context).dividerColor),
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            _buildActions(context, state),
-          ],
-        ),
-      ],
-    );
-  }
-
   Widget _buildActions(BuildContext context, DashboardState state) {
     final theme = Theme.of(context);
     return PopupMenuButton<String>(
@@ -1137,163 +1161,41 @@ class _DetailsViewState extends State<_DetailsView> {
     return Row(
       children: [
         Expanded(
-          child: _buildStatCard(
-            context,
-            "Total Calls",
-            summary.totalCalls.toString(),
-            TablerIcons.server,
-            Colors.blue,
+          child: StatCard(
+            title: "Total Calls",
+            value: summary.totalCalls.toString(),
+            icon: TablerIcons.server,
+            color: Colors.blue,
           ),
         ),
         const SizedBox(width: 16),
         Expanded(
-          child: _buildStatCard(
-            context,
-            "Success Rate",
-            "${summary.successRate.toStringAsFixed(1)}%",
-            TablerIcons.check,
-            Colors.green,
+          child: StatCard(
+            title: "Success Rate",
+            value: "${summary.successRate.toStringAsFixed(1)}%",
+            icon: TablerIcons.check,
+            color: Colors.green,
           ),
         ),
         const SizedBox(width: 16),
         Expanded(
-          child: _buildStatCard(
-            context,
-            "Network Errors",
-            "${summary.networkErrorRate.toStringAsFixed(1)}%",
-            TablerIcons.wifi_off,
-            Colors.red,
+          child: StatCard(
+            title: "Network Errors",
+            value: "${summary.networkErrorRate.toStringAsFixed(1)}%",
+            icon: TablerIcons.wifi_off,
+            color: Colors.red,
           ),
         ),
         const SizedBox(width: 16),
         Expanded(
-          child: _buildStatCard(
-            context,
-            "Server Errors",
-            "${summary.serverErrorRate.toStringAsFixed(1)}%",
-            TablerIcons.alert_triangle,
-            Colors.orange,
+          child: StatCard(
+            title: "Server Errors",
+            value: "${summary.serverErrorRate.toStringAsFixed(1)}%",
+            icon: TablerIcons.alert_triangle,
+            color: Colors.orange,
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildStatCard(
-    BuildContext context,
-    String title,
-    String value,
-    IconData icon,
-    Color color,
-  ) {
-    final theme = Theme.of(context);
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: theme.dividerColor),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                title,
-                style: AppTypography.caption.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-                overflow: TextOverflow.ellipsis,
-              ),
-              Icon(icon, color: color, size: 20),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Text(
-            value,
-            style: AppTypography.h3.copyWith(
-              color: theme.colorScheme.onSurface,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildApiStatsTable(BuildContext context, List<APIStat> apiStats) {
-    final theme = Theme.of(context);
-
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: theme.dividerColor),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: Text(
-              "API Performance Statistics",
-              style: AppTypography.h4.copyWith(
-                color: theme.colorScheme.onSurface,
-              ),
-            ),
-          ),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: DataTable(
-              columns: const [
-                DataColumn(label: Text("API Name")),
-                DataColumn(label: Text("Count"), numeric: true),
-                DataColumn(label: Text("Mean (ms)"), numeric: true),
-                DataColumn(label: Text("P99 (ms)"), numeric: true),
-                DataColumn(label: Text("Max (ms)"), numeric: true),
-                DataColumn(label: Text("Error Rate"), numeric: true),
-              ],
-              rows: apiStats.map((stat) {
-                return DataRow(
-                  cells: [
-                    DataCell(Text(stat.apiName, style: AppTypography.body)),
-                    DataCell(
-                      Text(stat.count.toString(), style: AppTypography.mono),
-                    ),
-                    DataCell(
-                      Text(
-                        stat.mean.toStringAsFixed(0),
-                        style: AppTypography.mono,
-                      ),
-                    ),
-                    DataCell(
-                      Text(
-                        stat.p99.toStringAsFixed(0),
-                        style: AppTypography.mono,
-                      ),
-                    ),
-                    DataCell(
-                      Text(stat.max.toString(), style: AppTypography.mono),
-                    ),
-                    DataCell(
-                      Text(
-                        "${stat.errorRate.toStringAsFixed(1)}%",
-                        style: AppTypography.mono.copyWith(
-                          color: stat.errorRate > 0
-                              ? AppColors.error
-                              : AppColors.success,
-                        ),
-                      ),
-                    ),
-                  ],
-                );
-              }).toList(),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

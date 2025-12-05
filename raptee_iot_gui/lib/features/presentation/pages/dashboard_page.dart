@@ -9,6 +9,8 @@ import '../bloc/dashboard_bloc.dart';
 import '../bloc/dashboard_event.dart';
 import '../bloc/dashboard_state.dart';
 import '../widgets/custom_error_widget.dart';
+import '../widgets/stat_card.dart';
+import '../widgets/chart_card.dart';
 import '../../data/models/bike_model.dart';
 
 class DashboardPage extends StatelessWidget {
@@ -80,11 +82,38 @@ class _DashboardAnalyticsView extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                "Dashboard Overview",
-                style: AppTypography.h2.copyWith(
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Dashboard Overview",
+                    style: AppTypography.h2.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      context.read<DashboardBloc>().add(
+                        const DashboardFetchAllBikesEvent(),
+                      );
+                    },
+                    icon: const Icon(TablerIcons.refresh, size: 18),
+                    label: const Text("Refresh"),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.surface,
+                      foregroundColor: Theme.of(context).colorScheme.onSurface,
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        side: BorderSide(color: Theme.of(context).dividerColor),
+                      ),
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 24),
 
@@ -92,7 +121,7 @@ class _DashboardAnalyticsView extends StatelessWidget {
               Row(
                 children: [
                   Expanded(
-                    child: _MetricCard(
+                    child: StatCard(
                       title: "Total Bikes",
                       value: totalBikes.toString(),
                       icon: TablerIcons.motorbike,
@@ -101,7 +130,7 @@ class _DashboardAnalyticsView extends StatelessWidget {
                   ),
                   const SizedBox(width: 16),
                   Expanded(
-                    child: _MetricCard(
+                    child: StatCard(
                       title: "Active Models",
                       value: modelData.length.toString(),
                       icon: TablerIcons.chart_pie,
@@ -110,7 +139,7 @@ class _DashboardAnalyticsView extends StatelessWidget {
                   ),
                   const SizedBox(width: 16),
                   Expanded(
-                    child: _MetricCard(
+                    child: StatCard(
                       title: "Colors",
                       value: colorData.length.toString(),
                       icon: TablerIcons.palette,
@@ -125,7 +154,7 @@ class _DashboardAnalyticsView extends StatelessWidget {
               Row(
                 children: [
                   Expanded(
-                    child: _ChartCard(
+                    child: ChartCard(
                       title: "Model Distribution",
                       child: SfCircularChart(
                         legend: Legend(
@@ -147,7 +176,7 @@ class _DashboardAnalyticsView extends StatelessWidget {
                   ),
                   const SizedBox(width: 24),
                   Expanded(
-                    child: _ChartCard(
+                    child: ChartCard(
                       title: "Color Distribution",
                       child: SfCircularChart(
                         legend: Legend(
@@ -172,7 +201,7 @@ class _DashboardAnalyticsView extends StatelessWidget {
               const SizedBox(height: 24),
 
               // Charts Row 2: Registration Trends
-              _ChartCard(
+              ChartCard(
                 title: "Registration Trends",
                 child: SfCartesianChart(
                   primaryXAxis: CategoryAxis(),
@@ -248,97 +277,7 @@ class _DashboardAnalyticsView extends StatelessWidget {
   }
 }
 
-class _MetricCard extends StatelessWidget {
-  final String title;
-  final String value;
-  final IconData icon;
-  final Color color;
 
-  const _MetricCard({
-    required this.title,
-    required this.value,
-    required this.icon,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: theme.dividerColor),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(icon, color: color, size: 28),
-          ),
-          const SizedBox(width: 16),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: AppTypography.caption.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                value,
-                style: AppTypography.h2.copyWith(
-                  color: theme.colorScheme.onSurface,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ChartCard extends StatelessWidget {
-  final String title;
-  final Widget child;
-
-  const _ChartCard({required this.title, required this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Container(
-      height: 350,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: theme.dividerColor),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: AppTypography.h3.copyWith(
-              color: theme.colorScheme.onSurface,
-            ),
-          ),
-          const SizedBox(height: 20),
-          Expanded(child: child),
-        ],
-      ),
-    );
-  }
-}
 
 class _ChartData {
   _ChartData(this.x, this.y);
