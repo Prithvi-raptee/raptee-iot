@@ -65,7 +65,7 @@ func HandleListBikes(c *gin.Context) {
 	}
 
 	// Build Query
-	sql := `SELECT bike_id, metadata FROM bikes`
+	sql := `SELECT bike_id, metadata, last_seen_at FROM bikes`
 	args := []interface{}{}
 	argCounter := 1
 
@@ -90,7 +90,7 @@ func HandleListBikes(c *gin.Context) {
 
 	for rows.Next() {
 		var b models.Bike
-		if err := rows.Scan(&b.BikeID, &b.Metadata); err != nil {
+		if err := rows.Scan(&b.BikeID, &b.Metadata, &b.LastSeenAt); err != nil {
 			continue
 		}
 		bikes = append(bikes, b)

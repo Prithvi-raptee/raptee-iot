@@ -1,5 +1,7 @@
 package models
 
+import "time"
+
 // CompactRequest represents the structure for sync requests
 type CompactRequest struct {
 	BikeID    string          `json:"bike_id"`
@@ -16,8 +18,9 @@ type ProvisionRequest struct {
 
 // Bike represents a bike entity
 type Bike struct {
-	BikeID   string                 `json:"bike_id"`
-	Metadata map[string]interface{} `json:"metadata"`
+	BikeID     string                 `json:"bike_id"`
+	Metadata   map[string]interface{} `json:"metadata"`
+	LastSeenAt time.Time              `json:"last_seen_at"`
 }
 
 // BikeListResponse represents the response for listing bikes
