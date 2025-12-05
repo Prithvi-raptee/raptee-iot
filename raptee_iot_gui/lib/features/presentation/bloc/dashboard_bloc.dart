@@ -21,16 +21,12 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     try {
       // Fetch initial data
       final telemetry = await repository.getBikeTelemetry(event.bikeId);
-      // Note: In a real app, we'd get the cursor from the response wrapper. 
-      // For now, assuming repository handles it or we need to adjust repository to return a wrapper.
-      // Let's assume for this step we just get the list. 
-      // To support pagination properly, Repository should return a composite object.
-      // But based on current Repository impl, it returns List<TelemetryModel>.
-      // We will stick to that for now and assume no pagination for the first pass or modify Repository later.
+      final analytics = await repository.getBikeAnalytics(event.bikeId);
       
       emit(state.copyWith(
         status: DashboardStatus.success,
         telemetry: telemetry,
+        analytics: analytics,
       ));
     } catch (e) {
       emit(state.copyWith(

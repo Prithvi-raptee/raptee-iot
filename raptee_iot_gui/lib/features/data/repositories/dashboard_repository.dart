@@ -1,6 +1,7 @@
 import 'dart:convert';
 import '../datasources/dashboard_remote_datasource.dart';
 import '../models/telemetry_model.dart';
+import '../models/analytics_model.dart';
 import '../models/bike_model.dart';
 
 class DashboardRepository {
@@ -37,6 +38,10 @@ class DashboardRepository {
     } catch (e) {
       rethrow;
     }
+  }
+  
+  Future<AnalyticsResponse> getBikeAnalytics(String bikeId) async {
+    return await remoteDataSource.getAnalytics(bikeId);
   }
 
   Future<List<BikeModel>> getBikes({String? cursor, int limit = 50}) async {
