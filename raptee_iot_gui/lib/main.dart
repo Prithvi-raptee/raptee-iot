@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'core/routes/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_manager.dart';
+import 'core/utils/web_scroll_behavior.dart';
 
 void main() {
   runApp(const RapteeIoTApp());
@@ -18,6 +19,9 @@ class RapteeIoTApp extends StatelessWidget {
         return MaterialApp.router(
           debugShowCheckedModeBanner: false,
           title: 'Raptee IoT',
+          scrollBehavior: WebScrollBehavior(),
+
+
 
           // 1. Theme
           theme: AppTheme.light,

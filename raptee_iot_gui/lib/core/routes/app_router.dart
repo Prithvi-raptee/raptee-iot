@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../features/data/datasources/dashboard_remote_datasource.dart';
@@ -37,7 +38,9 @@ class AppRouter {
               create: (context) =>
                   DashboardBloc(repository: repository)
                     ..add(const DashboardFetchAllBikesEvent()),
-              child: MainLayout(child: child),
+              child: SelectionArea(
+                child: MainLayout(child: child),
+              ),
             ),
           );
         },
