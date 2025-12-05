@@ -184,7 +184,7 @@ func HandleRead(c *gin.Context) {
 
 func HandleDeleteBikes(c *gin.Context) {
 	// 1. Check for JSON Body (Bulk Delete)
-	var req DeleteRequest
+	var req models.DeleteRequest
 	if err := c.ShouldBindJSON(&req); err == nil && len(req.BikeIDs) > 0 {
 		// Bulk Delete
 		// Use ANY($1) to match any ID in the list
@@ -255,7 +255,7 @@ func HandleDeleteBike(c *gin.Context) {
 
 func HandleDeleteTelemetry(c *gin.Context) {
 	// 1. Check for JSON Body (Bulk Delete by Bike IDs)
-	var req DeleteRequest
+	var req models.DeleteRequest
 	if err := c.ShouldBindJSON(&req); err == nil && len(req.BikeIDs) > 0 {
 		// Delete ALL telemetry for these bikes
 		res, err := db.Pool.Exec(context.Background(), "DELETE FROM telemetry_logs WHERE bike_id = ANY($1)", req.BikeIDs)
