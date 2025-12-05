@@ -12,6 +12,7 @@ import '../../features/presentation/pages/bikes_page.dart';
 import '../../features/presentation/pages/dashboard_page.dart';
 import '../../features/presentation/pages/details_page.dart';
 import '../../features/presentation/pages/map_page.dart';
+import '../../features/data/models/bike_model.dart';
 
 class AppRouter {
   static final _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -55,7 +56,8 @@ class AppRouter {
                 name: 'details',
                 builder: (context, state) {
                   final bikeId = state.pathParameters['bikeId']!;
-                  return DetailsPage(bikeId: bikeId);
+                  final bike = state.extra as BikeModel?;
+                  return DetailsPage(bikeId: bikeId, bike: bike);
                 },
               ),
             ],

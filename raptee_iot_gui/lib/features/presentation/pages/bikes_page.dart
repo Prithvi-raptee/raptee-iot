@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import '../../../core/utils/date_formatter.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
 import 'package:go_router/go_router.dart';
@@ -283,9 +285,18 @@ class _BikesViewState extends State<_BikesView> {
                               ),
                             ),
                             Expanded(
-                              flex: 3,
+                              flex: 2,
                               child: Text(
                                 "Bike ID",
+                                style: AppTypography.caption.copyWith(
+                                  color: colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              flex: 2,
+                              child: Text(
+                                "Reg",
                                 style: AppTypography.caption.copyWith(
                                   color: colorScheme.onSurfaceVariant,
                                 ),
@@ -304,6 +315,15 @@ class _BikesViewState extends State<_BikesView> {
                               flex: 2,
                               child: Text(
                                 "Color",
+                                style: AppTypography.caption.copyWith(
+                                  color: colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              flex: 3,
+                              child: Text(
+                                "Last Synced",
                                 style: AppTypography.caption.copyWith(
                                   color: colorScheme.onSurfaceVariant,
                                 ),
@@ -331,6 +351,7 @@ class _BikesViewState extends State<_BikesView> {
                                 context.pushNamed(
                                   'details',
                                   pathParameters: {'bikeId': bike.bikeId},
+                                  extra: bike,
                                 );
                               },
                               child: Padding(
@@ -349,12 +370,21 @@ class _BikesViewState extends State<_BikesView> {
                                       ),
                                     ),
                                     Expanded(
-                                      flex: 3,
+                                      flex: 2,
                                       child: Text(
                                         bike.bikeId,
                                         style: AppTypography.body.copyWith(
                                           color: colorScheme.onSurface,
                                           fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                    Expanded(
+                                      flex: 2,
+                                      child: Text(
+                                        bike.metadata['reg'] as String? ?? '-',
+                                        style: AppTypography.body.copyWith(
+                                          color: colorScheme.onSurface,
                                         ),
                                       ),
                                     ),
@@ -375,6 +405,19 @@ class _BikesViewState extends State<_BikesView> {
                                             '-',
                                         style: AppTypography.body.copyWith(
                                           color: colorScheme.onSurface,
+                                        ),
+                                      ),
+                                    ),
+                                    Expanded(
+                                      flex: 3,
+                                      child: Text(
+                                        bike.lastSeenAt != null
+                                            ? DateFormatter.getFuzzyTime(
+                                              bike.lastSeenAt!,
+                                            )
+                                            : 'Unknown',
+                                        style: AppTypography.caption.copyWith(
+                                          color: colorScheme.onSurfaceVariant,
                                         ),
                                       ),
                                     ),

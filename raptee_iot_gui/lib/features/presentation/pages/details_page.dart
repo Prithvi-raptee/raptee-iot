@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../data/models/bike_model.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
@@ -20,8 +21,9 @@ import '../../../core/widgets/confirmation_dialog.dart';
 
 class DetailsPage extends StatelessWidget {
   final String bikeId;
+  final BikeModel? bike;
 
-  const DetailsPage({super.key, required this.bikeId});
+  const DetailsPage({super.key, required this.bikeId, this.bike});
 
   @override
   Widget build(BuildContext context) {
@@ -32,15 +34,16 @@ class DetailsPage extends StatelessWidget {
       create: (context) =>
           DashboardBloc(repository: repository)
             ..add(DashboardLoadEvent(bikeId)),
-      child: _DetailsView(bikeId: bikeId),
+      child: _DetailsView(bikeId: bikeId, bike: bike),
     );
   }
 }
 
 class _DetailsView extends StatefulWidget {
   final String bikeId;
+  final BikeModel? bike;
 
-  const _DetailsView({required this.bikeId});
+  const _DetailsView({required this.bikeId, this.bike});
 
   @override
   State<_DetailsView> createState() => _DetailsViewState();
@@ -180,6 +183,12 @@ class _DetailsViewState extends State<_DetailsView> {
                       _buildSummaryCards(context, analytics.summary),
                       const SizedBox(height: 32),
 
+                      if (widget.bike != null) ...[
+                        _buildSectionTitle("Vehicle Information"),
+                        _buildVehicleInfo(context, widget.bike!),
+                        const SizedBox(height: 32),
+                      ],
+
                       _buildSectionTitle("Failure & High Latency Analysis"),
                       _buildFailureAnalysis(context, analytics.failures),
                       const SizedBox(height: 32),
@@ -256,6 +265,96 @@ class _DetailsViewState extends State<_DetailsView> {
           color: Theme.of(context).colorScheme.primary,
         ),
       ),
+    );
+  }
+
+  Widget _buildVehicleInfo(BuildContext context, BikeModel bike) {
+    final metadata = bike.metadata;
+    final lastSeen = bike.lastSeenAt != null
+        ? DateFormat('MMM d, yyyy HH:mm').format(bike.lastSeenAt!)
+        : 'Unknown';
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Theme.of(context).dividerColor),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: _buildInfoItem(
+                  context,
+                  "Registration",
+                  metadata['reg']?.toString() ?? 'N/A',
+                ),
+              ),
+              const SizedBox(width: 24),
+              Expanded(
+                child: _buildInfoItem(
+                  context,
+                  "Model",
+                  metadata['model']?.toString() ?? 'N/A',
+                ),
+              ),
+              const SizedBox(width: 24),
+              Expanded(
+                child: _buildInfoItem(
+                  context,
+                  "Color",
+                  metadata['color']?.toString() ?? 'N/A',
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          Row(
+            children: [
+              Expanded(
+                child: _buildInfoItem(
+                  context,
+                  "Year",
+                  metadata['year']?.toString() ?? 'N/A',
+                ),
+              ),
+              const SizedBox(width: 24),
+              Expanded(
+                child: _buildInfoItem(
+                  context,
+                  "Last Seen",
+                  lastSeen,
+                ),
+              ),
+              const Expanded(child: SizedBox()), // Spacer
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoItem(BuildContext context, String label, String value) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: AppTypography.caption.copyWith(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: AppTypography.body.copyWith(
+            color: Theme.of(context).colorScheme.onSurface,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
     );
   }
 

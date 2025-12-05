@@ -4,7 +4,7 @@ class AppConstants {
 
   // API Config
   static const String apiBaseUrl =
-      "https://n4gzvnxn5h.ap-south-1.awsapprunner.com/api/v1";
+      "https://rapteegravitee.dpdns.org/gateway/raptee-telemetry/api/v1";
   // App Config
   static const int connectTimeout = 15000;
   static const int refreshRateMs = 5000;

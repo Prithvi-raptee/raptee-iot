@@ -57,6 +57,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     emit(state.copyWith(deleteStatus: DeleteStatus.deleting));
     try {
       await repository.deleteBike(event.bikeId);
+      add(const DashboardFetchAllBikesEvent());
       emit(
         state.copyWith(
           deleteStatus: DeleteStatus.success,

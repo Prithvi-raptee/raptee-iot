@@ -24,6 +24,8 @@ mixin _$BikeModel {
   @JsonKey(name: 'bike_id')
   String get bikeId => throw _privateConstructorUsedError;
   Map<String, dynamic> get metadata => throw _privateConstructorUsedError;
+  @JsonKey(name: 'last_seen_at')
+  DateTime? get lastSeenAt => throw _privateConstructorUsedError;
 
   /// Serializes this BikeModel to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -43,6 +45,7 @@ abstract class $BikeModelCopyWith<$Res> {
   $Res call({
     @JsonKey(name: 'bike_id') String bikeId,
     Map<String, dynamic> metadata,
+    @JsonKey(name: 'last_seen_at') DateTime? lastSeenAt,
   });
 }
 
@@ -60,7 +63,11 @@ class _$BikeModelCopyWithImpl<$Res, $Val extends BikeModel>
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({Object? bikeId = null, Object? metadata = null}) {
+  $Res call({
+    Object? bikeId = null,
+    Object? metadata = null,
+    Object? lastSeenAt = freezed,
+  }) {
     return _then(
       _value.copyWith(
             bikeId: null == bikeId
@@ -71,6 +78,10 @@ class _$BikeModelCopyWithImpl<$Res, $Val extends BikeModel>
                 ? _value.metadata
                 : metadata // ignore: cast_nullable_to_non_nullable
                       as Map<String, dynamic>,
+            lastSeenAt: freezed == lastSeenAt
+                ? _value.lastSeenAt
+                : lastSeenAt // ignore: cast_nullable_to_non_nullable
+                      as DateTime?,
           )
           as $Val,
     );
@@ -89,6 +100,7 @@ abstract class _$$BikeModelImplCopyWith<$Res>
   $Res call({
     @JsonKey(name: 'bike_id') String bikeId,
     Map<String, dynamic> metadata,
+    @JsonKey(name: 'last_seen_at') DateTime? lastSeenAt,
   });
 }
 
@@ -105,7 +117,11 @@ class __$$BikeModelImplCopyWithImpl<$Res>
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({Object? bikeId = null, Object? metadata = null}) {
+  $Res call({
+    Object? bikeId = null,
+    Object? metadata = null,
+    Object? lastSeenAt = freezed,
+  }) {
     return _then(
       _$BikeModelImpl(
         bikeId: null == bikeId
@@ -116,6 +132,10 @@ class __$$BikeModelImplCopyWithImpl<$Res>
             ? _value._metadata
             : metadata // ignore: cast_nullable_to_non_nullable
                   as Map<String, dynamic>,
+        lastSeenAt: freezed == lastSeenAt
+            ? _value.lastSeenAt
+            : lastSeenAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
       ),
     );
   }
@@ -127,6 +147,7 @@ class _$BikeModelImpl implements _BikeModel {
   const _$BikeModelImpl({
     @JsonKey(name: 'bike_id') required this.bikeId,
     required final Map<String, dynamic> metadata,
+    @JsonKey(name: 'last_seen_at') this.lastSeenAt,
   }) : _metadata = metadata;
 
   factory _$BikeModelImpl.fromJson(Map<String, dynamic> json) =>
@@ -144,8 +165,12 @@ class _$BikeModelImpl implements _BikeModel {
   }
 
   @override
+  @JsonKey(name: 'last_seen_at')
+  final DateTime? lastSeenAt;
+
+  @override
   String toString() {
-    return 'BikeModel(bikeId: $bikeId, metadata: $metadata)';
+    return 'BikeModel(bikeId: $bikeId, metadata: $metadata, lastSeenAt: $lastSeenAt)';
   }
 
   @override
@@ -154,7 +179,9 @@ class _$BikeModelImpl implements _BikeModel {
         (other.runtimeType == runtimeType &&
             other is _$BikeModelImpl &&
             (identical(other.bikeId, bikeId) || other.bikeId == bikeId) &&
-            const DeepCollectionEquality().equals(other._metadata, _metadata));
+            const DeepCollectionEquality().equals(other._metadata, _metadata) &&
+            (identical(other.lastSeenAt, lastSeenAt) ||
+                other.lastSeenAt == lastSeenAt));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -163,6 +190,7 @@ class _$BikeModelImpl implements _BikeModel {
     runtimeType,
     bikeId,
     const DeepCollectionEquality().hash(_metadata),
+    lastSeenAt,
   );
 
   /// Create a copy of BikeModel
@@ -183,6 +211,7 @@ abstract class _BikeModel implements BikeModel {
   const factory _BikeModel({
     @JsonKey(name: 'bike_id') required final String bikeId,
     required final Map<String, dynamic> metadata,
+    @JsonKey(name: 'last_seen_at') final DateTime? lastSeenAt,
   }) = _$BikeModelImpl;
 
   factory _BikeModel.fromJson(Map<String, dynamic> json) =
@@ -193,6 +222,9 @@ abstract class _BikeModel implements BikeModel {
   String get bikeId;
   @override
   Map<String, dynamic> get metadata;
+  @override
+  @JsonKey(name: 'last_seen_at')
+  DateTime? get lastSeenAt;
 
   /// Create a copy of BikeModel
   /// with the given fields replaced by the non-null parameter values.

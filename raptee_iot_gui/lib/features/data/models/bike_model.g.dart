@@ -10,12 +10,16 @@ _$BikeModelImpl _$$BikeModelImplFromJson(Map<String, dynamic> json) =>
     _$BikeModelImpl(
       bikeId: json['bike_id'] as String,
       metadata: json['metadata'] as Map<String, dynamic>,
+      lastSeenAt: json['last_seen_at'] == null
+          ? null
+          : DateTime.parse(json['last_seen_at'] as String),
     );
 
 Map<String, dynamic> _$$BikeModelImplToJson(_$BikeModelImpl instance) =>
     <String, dynamic>{
       'bike_id': instance.bikeId,
       'metadata': instance.metadata,
+      'last_seen_at': instance.lastSeenAt?.toIso8601String(),
     };
 
 _$BikeListResponseImpl _$$BikeListResponseImplFromJson(
