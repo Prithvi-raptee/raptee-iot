@@ -19,10 +19,24 @@ class AnalyticsResponse {
     return AnalyticsResponse(
       bikeId: json['bike_id'] ?? '',
       summary: AnalyticsSummary.fromJson(json['summary'] ?? {}),
-      apiStats: (json['api_stats'] as List?)?.map((e) => APIStat.fromJson(e)).toList() ?? [],
-      connectivity: ConnectivityStats.fromJson(json['connectivity_stats'] ?? {}),
-      failures: (json['failures'] as List?)?.map((e) => FailureIncident.fromJson(e)).toList() ?? [],
-      timeSeries: (json['time_series'] as List?)?.map((e) => TimeSeriesPoint.fromJson(e)).toList() ?? [],
+      apiStats:
+          (json['api_stats'] as List?)
+              ?.map((e) => APIStat.fromJson(e))
+              .toList() ??
+          [],
+      connectivity: ConnectivityStats.fromJson(
+        json['connectivity_stats'] ?? {},
+      ),
+      failures:
+          (json['failures'] as List?)
+              ?.map((e) => FailureIncident.fromJson(e))
+              .toList() ??
+          [],
+      timeSeries:
+          (json['time_series'] as List?)
+              ?.map((e) => TimeSeriesPoint.fromJson(e))
+              .toList() ??
+          [],
     );
   }
 }
@@ -113,12 +127,16 @@ class ConnectivityStats {
 
   factory ConnectivityStats.fromJson(Map<String, dynamic> json) {
     return ConnectivityStats(
-      stateDistribution: Map<String, int>.from(json['state_distribution'] ?? {}),
-      failureRateByState: (json['failure_rate_by_state'] as Map<String, dynamic>?)?.map(
+      stateDistribution: Map<String, int>.from(
+        json['state_distribution'] ?? {},
+      ),
+      failureRateByState:
+          (json['failure_rate_by_state'] as Map<String, dynamic>?)?.map(
             (k, v) => MapEntry(k, (v as num).toDouble()),
           ) ??
           {},
-      latencyByState: (json['latency_by_state'] as Map<String, dynamic>?)?.map(
+      latencyByState:
+          (json['latency_by_state'] as Map<String, dynamic>?)?.map(
             (k, v) => MapEntry(k, (v as List).map((e) => e as int).toList()),
           ) ??
           {},

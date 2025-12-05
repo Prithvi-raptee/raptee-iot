@@ -4,6 +4,7 @@ import '../../data/models/analytics_model.dart';
 import '../../data/models/bike_model.dart';
 
 enum DashboardStatus { initial, loading, success, failure }
+
 enum DeleteStatus { initial, deleting, success, failure }
 
 class DashboardState extends Equatable {
@@ -50,5 +51,14 @@ class DashboardState extends Equatable {
   }
 
   @override
-  List<Object?> get props => [status, deleteStatus, bikeId, telemetry, analytics, bikes, nextCursor, errorMessage];
+  List<Object?> get props => [
+    status,
+    deleteStatus,
+    bikeId,
+    telemetry,
+    analytics,
+    bikes,
+    nextCursor,
+    errorMessage,
+  ];
 }

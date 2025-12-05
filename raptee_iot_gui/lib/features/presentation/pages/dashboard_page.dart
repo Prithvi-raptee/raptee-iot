@@ -194,7 +194,6 @@ class _DashboardAnalyticsView extends StatelessWidget {
               const SizedBox(height: 24),
 
               // Bike List moved to Bikes Page
-
             ],
           ),
         );
@@ -346,5 +345,3 @@ class _ChartData {
   final String x;
   final int y;
 }
-
-

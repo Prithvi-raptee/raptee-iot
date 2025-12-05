@@ -19,20 +19,28 @@ class DashboardRemoteDataSourceImpl implements DashboardRemoteDataSource {
   DashboardRemoteDataSourceImpl({required this.apiClient});
 
   @override
-  Future<TelemetryResponse> getTelemetry(String bikeId, {String? cursor}) async {
+  Future<TelemetryResponse> getTelemetry(
+    String bikeId, {
+    String? cursor,
+  }) async {
     final Map<String, dynamic> queryParams = {'bike_id': bikeId};
     if (cursor != null) {
       queryParams['cursor'] = cursor;
     }
 
-    final response = await apiClient.get('/telemetry', queryParameters: queryParams);
+    final response = await apiClient.get(
+      '/telemetry',
+      queryParameters: queryParams,
+    );
     return TelemetryResponse.fromJson(response.data);
-
   }
 
   @override
   Future<AnalyticsResponse> getAnalytics(String bikeId) async {
-    final response = await apiClient.get('/analytics', queryParameters: {'bike_id': bikeId});
+    final response = await apiClient.get(
+      '/analytics',
+      queryParameters: {'bike_id': bikeId},
+    );
     return AnalyticsResponse.fromJson(response.data);
   }
 
@@ -43,7 +51,10 @@ class DashboardRemoteDataSourceImpl implements DashboardRemoteDataSource {
       queryParams['cursor'] = cursor;
     }
 
-    final response = await apiClient.get('/bikes', queryParameters: queryParams);
+    final response = await apiClient.get(
+      '/bikes',
+      queryParameters: queryParams,
+    );
     return BikeListResponse.fromJson(response.data);
   }
 

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
-import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../../core/constants/assets.dart';
@@ -16,7 +15,7 @@ class Sidebar extends StatelessWidget {
     // but based on AppColors it was _surface1. In AppTheme, darkSurface is _surface1.
     // So we can use theme.cardColor or a specific extension if we had one.
     // For now, let's use theme.cardColor which maps to _surface1 in our theme setup.
-    final sidebarColor = theme.cardColor; 
+    final sidebarColor = theme.cardColor;
 
     return Container(
       width: 72, // Fixed width for rail
@@ -30,7 +29,7 @@ class Sidebar extends StatelessWidget {
             decoration: BoxDecoration(
               border: Border(bottom: BorderSide(color: theme.dividerColor)),
             ),
-            child: SvgPicture.asset(Assets.logo(context), height: 28),
+            child: SvgPicture.asset(Assets.logo(context), height: 48),
           ),
 
           const SizedBox(height: 16),
@@ -72,7 +71,7 @@ class Sidebar extends StatelessWidget {
                 ),
                 const SizedBox(height: 24),
                 // Separator or just space
-                 Divider(color: theme.dividerColor, height: 24),
+                Divider(color: theme.dividerColor, height: 24),
                 _SidebarItem(
                   icon: TablerIcons.users,
                   label: 'Users',

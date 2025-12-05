@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
-import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/theme/theme_manager.dart';
 import 'sidebar.dart';
@@ -28,21 +27,31 @@ class MainLayout extends StatelessWidget {
                 Container(
                   height: 64,
                   padding: const EdgeInsets.symmetric(horizontal: 24),
-                  decoration:  BoxDecoration(
+                  decoration: BoxDecoration(
                     color: theme.scaffoldBackgroundColor,
-                    border: Border(bottom: BorderSide(color: theme.dividerColor)),
+                    border: Border(
+                      bottom: BorderSide(color: theme.dividerColor),
+                    ),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       // Breadcrumbs or Page Title (Placeholder)
-                      Text('Dashboard', style: AppTypography.h3.copyWith(color: theme.colorScheme.onSurface)),
+                      Text(
+                        'Dashboard',
+                        style: AppTypography.h3.copyWith(
+                          color: theme.colorScheme.onSurface,
+                        ),
+                      ),
 
                       // Header Actions
                       Row(
                         children: [
                           IconButton(
-                            icon: Icon(TablerIcons.search, color: theme.colorScheme.onSurfaceVariant),
+                            icon: Icon(
+                              TablerIcons.search,
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
                             onPressed: () {},
                           ),
                           const SizedBox(width: 8),
@@ -57,7 +66,9 @@ class MainLayout extends StatelessWidget {
                                   color: theme.colorScheme.onSurfaceVariant,
                                 ),
                                 onPressed: ThemeManager.toggleTheme,
-                                tooltip: isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode',
+                                tooltip: isDark
+                                    ? 'Switch to Light Mode'
+                                    : 'Switch to Dark Mode',
                               );
                             },
                           ),
@@ -68,9 +79,7 @@ class MainLayout extends StatelessWidget {
                 ),
 
                 // Page Content
-                Expanded(
-                  child: child,
-                ),
+                Expanded(child: child),
               ],
             ),
           ),

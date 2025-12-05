@@ -7,17 +7,21 @@ class ApiClient {
   final Logger _logger = Logger();
 
   ApiClient()
-      : _dio = Dio(
-          BaseOptions(
-            baseUrl: AppConstants.apiBaseUrl,
-            connectTimeout: const Duration(milliseconds: AppConstants.connectTimeout),
-            receiveTimeout: const Duration(milliseconds: AppConstants.connectTimeout),
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-            },
+    : _dio = Dio(
+        BaseOptions(
+          baseUrl: AppConstants.apiBaseUrl,
+          connectTimeout: const Duration(
+            milliseconds: AppConstants.connectTimeout,
           ),
-        ) {
+          receiveTimeout: const Duration(
+            milliseconds: AppConstants.connectTimeout,
+          ),
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+        ),
+      ) {
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) {
@@ -26,14 +30,16 @@ class ApiClient {
         },
         onResponse: (response, handler) {
           _logger.i(
-              'RESPONSE[${response.statusCode}] => PATH: ${response.requestOptions.path}');
+            'RESPONSE[${response.statusCode}] => PATH: ${response.requestOptions.path}',
+          );
           return handler.next(response);
         },
         onError: (DioException e, handler) {
           _logger.e(
-              'ERROR[${e.response?.statusCode}] => PATH: ${e.requestOptions.path}',
-              error: e.error,
-              stackTrace: e.stackTrace);
+            'ERROR[${e.response?.statusCode}] => PATH: ${e.requestOptions.path}',
+            error: e.error,
+            stackTrace: e.stackTrace,
+          );
           return handler.next(e);
         },
       ),
@@ -43,7 +49,10 @@ class ApiClient {
   Dio get client => _dio;
 
   // Generic GET method
-  Future<Response> get(String path, {Map<String, dynamic>? queryParameters}) async {
+  Future<Response> get(
+    String path, {
+    Map<String, dynamic>? queryParameters,
+  }) async {
     try {
       return await _dio.get(path, queryParameters: queryParameters);
     } catch (e) {
@@ -61,9 +70,17 @@ class ApiClient {
   }
 
   // Generic DELETE method
-  Future<Response> delete(String path, {dynamic data, Map<String, dynamic>? queryParameters}) async {
+  Future<Response> delete(
+    String path, {
+    dynamic data,
+    Map<String, dynamic>? queryParameters,
+  }) async {
     try {
-      return await _dio.delete(path, data: data, queryParameters: queryParameters);
+      return await _dio.delete(
+        path,
+        data: data,
+        queryParameters: queryParameters,
+      );
     } catch (e) {
       rethrow;
     }

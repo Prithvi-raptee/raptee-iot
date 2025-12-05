@@ -186,45 +186,45 @@ class _BikesViewState extends State<_BikesView> {
                           },
                           itemBuilder: (BuildContext context) =>
                               <PopupMenuEntry<String>>[
-                            PopupMenuItem<String>(
-                              value: 'delete_telemetry',
-                              child: Row(
-                                children: [
-                                  const Icon(
-                                    TablerIcons.trash,
-                                    size: 18,
-                                    color: AppColors.warning,
+                                PopupMenuItem<String>(
+                                  value: 'delete_telemetry',
+                                  child: Row(
+                                    children: [
+                                      const Icon(
+                                        TablerIcons.trash,
+                                        size: 18,
+                                        color: AppColors.warning,
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Text(
+                                        'Delete Telemetry',
+                                        style: AppTypography.body.copyWith(
+                                          color: theme.colorScheme.onSurface,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  const SizedBox(width: 12),
-                                  Text(
-                                    'Delete Telemetry',
-                                    style: AppTypography.body.copyWith(
-                                      color: theme.colorScheme.onSurface,
-                                    ),
+                                ),
+                                PopupMenuItem<String>(
+                                  value: 'delete_bikes',
+                                  child: Row(
+                                    children: [
+                                      const Icon(
+                                        TablerIcons.trash_x,
+                                        size: 18,
+                                        color: AppColors.error,
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Text(
+                                        'Delete Bikes',
+                                        style: AppTypography.body.copyWith(
+                                          color: theme.colorScheme.onSurface,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ],
-                              ),
-                            ),
-                            PopupMenuItem<String>(
-                              value: 'delete_bikes',
-                              child: Row(
-                                children: [
-                                  const Icon(
-                                    TablerIcons.trash_x,
-                                    size: 18,
-                                    color: AppColors.error,
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Text(
-                                    'Delete Bikes',
-                                    style: AppTypography.body.copyWith(
-                                      color: theme.colorScheme.onSurface,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
+                                ),
+                              ],
                         ),
                         const SizedBox(width: 16),
                       ],
@@ -270,7 +270,9 @@ class _BikesViewState extends State<_BikesView> {
                       // Table Header
                       Padding(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 20, vertical: 12),
+                          horizontal: 20,
+                          vertical: 12,
+                        ),
                         child: Row(
                           children: [
                             SizedBox(
@@ -307,7 +309,6 @@ class _BikesViewState extends State<_BikesView> {
                                 ),
                               ),
                             ),
-
                           ],
                         ),
                       ),
@@ -321,8 +322,9 @@ class _BikesViewState extends State<_BikesView> {
                               Divider(height: 1, color: theme.dividerColor),
                           itemBuilder: (context, index) {
                             final bike = bikes[index];
-                            final isSelected =
-                                _selectedBikeIds.contains(bike.bikeId);
+                            final isSelected = _selectedBikeIds.contains(
+                              bike.bikeId,
+                            );
 
                             return InkWell(
                               onTap: () {
@@ -376,7 +378,6 @@ class _BikesViewState extends State<_BikesView> {
                                         ),
                                       ),
                                     ),
-
                                   ],
                                 ),
                               ),
@@ -394,6 +395,4 @@ class _BikesViewState extends State<_BikesView> {
       },
     );
   }
-
-
 }

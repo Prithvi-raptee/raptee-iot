@@ -4,7 +4,7 @@ class AppColors {
   // --- Primitive Palette ---
   static const Color _black = Color(0xFF000000);
   static const Color _white = Color(0xFFFFFFFF);
-  
+
   // Dark Mode Primitives (Matte Style)
   static const Color _darkBg = Color(0xFF0F1115); // Deep matte dark background
   static const Color _darkSurface1 = Color(0xFF181B21); // Sidebar, Cards
@@ -19,8 +19,12 @@ class AppColors {
 
   // Brand Colors (Blue Accent)
   static const Color _brandBlue = Color(0xFF2979FF); // Tech Blue
-  static const Color _brandBlueLight = Color(0xFF63A4FF); // Lighter Blue for dark mode accent
-  static const Color _brandBlueDark = Color(0xFF004ECB); // Darker Blue for light mode accent
+  static const Color _brandBlueLight = Color(
+    0xFF63A4FF,
+  ); // Lighter Blue for dark mode accent
+  static const Color _brandBlueDark = Color(
+    0xFF004ECB,
+  ); // Darker Blue for light mode accent
 
   // Functional Colors
   static const Color _errorRed = Color(0xFFFF4C4C);
@@ -40,15 +44,16 @@ class AppColors {
   // --- Semantic Colors ---
 
   // Backgrounds
-  static Color get background => _darkBg; // Default accessors for backward compatibility if needed, but Theme should handle this
+  static Color get background =>
+      _darkBg; // Default accessors for backward compatibility if needed, but Theme should handle this
   static Color get sidebar => _darkSurface1;
-  
-  // We will expose static colors for direct usage where context isn't available, 
+
+  // We will expose static colors for direct usage where context isn't available,
   // but ideally we should use Theme.of(context) or specific getters for light/dark.
-  // For now, I'll keep the static structure but add Light/Dark specific maps if needed, 
+  // For now, I'll keep the static structure but add Light/Dark specific maps if needed,
   // or just rely on the Theme to pick the right one.
-  
-  // Since the existing code uses AppColors.background directly, we might need to refactor 
+
+  // Since the existing code uses AppColors.background directly, we might need to refactor
   // usages to use Theme.of(context).colorScheme.background or similar.
   // However, to keep it simple as per request, I will define the palettes.
 
@@ -94,7 +99,7 @@ class AppColors {
   static const Color textSecondaryLight = _textSecondaryLight;
   static const Color textDisabledLight = _textDisabledLight;
   static const Color textInverseLight = _white;
-  
+
   // Icons
   static const Color iconDefault = _textSecondaryDark;
   static const Color iconActive = _textPrimaryDark;

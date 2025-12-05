@@ -9,7 +9,7 @@ class AppTheme {
       brightness: Brightness.dark,
       scaffoldBackgroundColor: AppColors.darkBackground,
       primaryColor: AppColors.primary,
-      
+
       // Default Font Family
       fontFamily: 'Inter',
 
@@ -32,9 +32,13 @@ class AppTheme {
         displayMedium: AppTypography.h2.copyWith(color: AppColors.textPrimary),
         displaySmall: AppTypography.h3.copyWith(color: AppColors.textPrimary),
         headlineMedium: AppTypography.h4.copyWith(color: AppColors.textPrimary),
-        bodyLarge: AppTypography.bodyStrong.copyWith(color: AppColors.textPrimary),
+        bodyLarge: AppTypography.bodyStrong.copyWith(
+          color: AppColors.textPrimary,
+        ),
         bodyMedium: AppTypography.body.copyWith(color: AppColors.textPrimary),
-        bodySmall: AppTypography.caption.copyWith(color: AppColors.textSecondary),
+        bodySmall: AppTypography.caption.copyWith(
+          color: AppColors.textSecondary,
+        ),
       ),
 
       // Standard Card Style
@@ -52,9 +56,16 @@ class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.darkInputFill,
-        labelStyle: AppTypography.caption.copyWith(color: AppColors.textSecondary),
-        hintStyle: AppTypography.caption.copyWith(color: AppColors.textDisabled),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        labelStyle: AppTypography.caption.copyWith(
+          color: AppColors.textSecondary,
+        ),
+        hintStyle: AppTypography.caption.copyWith(
+          color: AppColors.textDisabled,
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
         border: OutlineInputBorder(
           borderSide: BorderSide(color: AppColors.darkBorder),
           borderRadius: BorderRadius.circular(8),
@@ -81,10 +92,7 @@ class AppTheme {
       ),
 
       // Icon Theme
-      iconTheme: const IconThemeData(
-        color: AppColors.iconDefault,
-        size: 20,
-      ),
+      iconTheme: const IconThemeData(color: AppColors.iconDefault, size: 20),
     );
   }
 
@@ -94,7 +102,7 @@ class AppTheme {
       brightness: Brightness.light,
       scaffoldBackgroundColor: AppColors.lightBackground,
       primaryColor: AppColors.primary,
-      
+
       // Default Font Family
       fontFamily: 'Inter',
 
@@ -113,13 +121,27 @@ class AppTheme {
 
       // Text Theme
       textTheme: TextTheme(
-        displayLarge: AppTypography.h1.copyWith(color: AppColors.textPrimaryLight),
-        displayMedium: AppTypography.h2.copyWith(color: AppColors.textPrimaryLight),
-        displaySmall: AppTypography.h3.copyWith(color: AppColors.textPrimaryLight),
-        headlineMedium: AppTypography.h4.copyWith(color: AppColors.textPrimaryLight),
-        bodyLarge: AppTypography.bodyStrong.copyWith(color: AppColors.textPrimaryLight),
-        bodyMedium: AppTypography.body.copyWith(color: AppColors.textPrimaryLight),
-        bodySmall: AppTypography.caption.copyWith(color: AppColors.textSecondaryLight),
+        displayLarge: AppTypography.h1.copyWith(
+          color: AppColors.textPrimaryLight,
+        ),
+        displayMedium: AppTypography.h2.copyWith(
+          color: AppColors.textPrimaryLight,
+        ),
+        displaySmall: AppTypography.h3.copyWith(
+          color: AppColors.textPrimaryLight,
+        ),
+        headlineMedium: AppTypography.h4.copyWith(
+          color: AppColors.textPrimaryLight,
+        ),
+        bodyLarge: AppTypography.bodyStrong.copyWith(
+          color: AppColors.textPrimaryLight,
+        ),
+        bodyMedium: AppTypography.body.copyWith(
+          color: AppColors.textPrimaryLight,
+        ),
+        bodySmall: AppTypography.caption.copyWith(
+          color: AppColors.textSecondaryLight,
+        ),
       ),
 
       // Standard Card Style
@@ -137,9 +159,16 @@ class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.lightInputFill,
-        labelStyle: AppTypography.caption.copyWith(color: AppColors.textSecondaryLight),
-        hintStyle: AppTypography.caption.copyWith(color: AppColors.textDisabledLight),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        labelStyle: AppTypography.caption.copyWith(
+          color: AppColors.textSecondaryLight,
+        ),
+        hintStyle: AppTypography.caption.copyWith(
+          color: AppColors.textDisabledLight,
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
         border: OutlineInputBorder(
           borderSide: BorderSide(color: AppColors.lightBorder),
           borderRadius: BorderRadius.circular(8),

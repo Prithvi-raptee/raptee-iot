@@ -30,7 +30,9 @@ class CustomErrorWidget extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
                 // If dark mode, add a subtle light background or glow to make the white image pop nicely
                 // or just let it be if it looks good. Given it's a white BG image:
-                color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.transparent,
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.05)
+                    : Colors.transparent,
               ),
               padding: const EdgeInsets.all(20),
               child: ClipRRect(
@@ -50,9 +52,7 @@ class CustomErrorWidget extends StatelessWidget {
             // Title
             Text(
               title ?? 'Oops! Something went wrong',
-              style: AppTypography.h3.copyWith(
-                color: theme.colorScheme.error,
-              ),
+              style: AppTypography.h3.copyWith(color: theme.colorScheme.error),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 12),
@@ -74,7 +74,10 @@ class CustomErrorWidget extends StatelessWidget {
                 icon: const Icon(Icons.refresh),
                 label: const Text('Try Again'),
                 style: FilledButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32,
+                    vertical: 16,
+                  ),
                 ),
               ),
           ],

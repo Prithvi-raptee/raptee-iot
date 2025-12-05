@@ -26,14 +26,17 @@ class AppRouter {
         builder: (context, state, child) {
           // Initialize dependencies here (or use DI container like GetIt)
           final apiClient = ApiClient();
-          final dataSource = DashboardRemoteDataSourceImpl(apiClient: apiClient);
+          final dataSource = DashboardRemoteDataSourceImpl(
+            apiClient: apiClient,
+          );
           final repository = DashboardRepository(remoteDataSource: dataSource);
 
           return RepositoryProvider(
             create: (context) => repository,
             child: BlocProvider(
-              create: (context) => DashboardBloc(repository: repository)
-                ..add(const DashboardFetchAllBikesEvent()),
+              create: (context) =>
+                  DashboardBloc(repository: repository)
+                    ..add(const DashboardFetchAllBikesEvent()),
               child: MainLayout(child: child),
             ),
           );

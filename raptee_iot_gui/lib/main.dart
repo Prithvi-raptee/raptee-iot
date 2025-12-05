@@ -18,12 +18,12 @@ class RapteeIoTApp extends StatelessWidget {
         return MaterialApp.router(
           debugShowCheckedModeBanner: false,
           title: 'Raptee IoT',
-          
+
           // 1. Theme
           theme: AppTheme.light,
           darkTheme: AppTheme.dark,
           themeMode: themeMode,
-          
+
           // 2. Router (Replaces 'home')
           routerConfig: AppRouter.router,
         );

@@ -12,19 +12,19 @@ class Assets {
     // Usually:
     // Dark Theme -> Dark Background -> Needs Light/White Logo.
     // Light Theme -> Light Background -> Needs Dark/Black Logo.
-    
+
     // If the file is named "raptee_logo_dark.svg", it might mean the logo ITSELF is dark (for light bg).
     // If the file is named "raptee_logo_light.svg", it might mean the logo ITSELF is light (for dark bg).
-    
+
     // Let's assume:
     // Brightness.dark (Dark Mode) -> Needs Light Logo -> _logoLight
     // Brightness.light (Light Mode) -> Needs Dark Logo -> _logoDark
-    
+
     // Wait, user said: "Replace the bolt icon with @[raptee_iot_gui/assets/svg/raptee_logo_dark.svg] @[raptee_iot_gui/assets/svg/raptee_logo_light.svg]"
     // I will implement logic:
     // Dark Mode -> _logoLight (assuming it's white/light colored)
     // Light Mode -> _logoDark (assuming it's black/dark colored)
-    
+
     return brightness == Brightness.dark ? _logoLight : _logoDark;
   }
 }

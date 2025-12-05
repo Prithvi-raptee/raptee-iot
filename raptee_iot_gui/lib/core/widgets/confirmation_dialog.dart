@@ -65,7 +65,9 @@ class ConfirmationDialog extends StatelessWidget {
           child: Text(
             confirmText,
             style: AppTypography.body.copyWith(
-              color: isDangerous ? AppColors.error : Theme.of(context).colorScheme.primary,
+              color: isDangerous
+                  ? AppColors.error
+                  : Theme.of(context).colorScheme.primary,
               fontWeight: FontWeight.w600,
             ),
           ),

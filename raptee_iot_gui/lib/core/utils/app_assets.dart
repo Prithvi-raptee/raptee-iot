@@ -7,14 +7,15 @@ class AppAssets {
   // --- Registry (Add paths here so you don't type strings in UI) ---
   static const String logo = "assets/images/logo.svg";
   static const String bikeIcon = "assets/icons/bike.svg";
-  
+
   // --- The Smart Loader ---
   // Use: AppAssets.load(AppAssets.logo)
-  static Widget load(String source, {
-    double? width, 
-    double? height, 
-    Color? color, 
-    BoxFit fit = BoxFit.contain
+  static Widget load(
+    String source, {
+    double? width,
+    double? height,
+    Color? color,
+    BoxFit fit = BoxFit.contain,
   }) {
     // 1. Network Image (Cached)
     if (source.startsWith("http")) {
@@ -25,11 +26,16 @@ class AppAssets {
         fit: fit,
         placeholder: (context, url) => Center(
           child: SizedBox(
-            width: 20, height: 20, 
-            child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary)
-          )
+            width: 20,
+            height: 20,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: AppColors.primary,
+            ),
+          ),
         ),
-        errorWidget: (context, url, error) => Icon(Icons.error, color: AppColors.error),
+        errorWidget: (context, url, error) =>
+            Icon(Icons.error, color: AppColors.error),
       );
     }
 
@@ -40,7 +46,9 @@ class AppAssets {
         width: width,
         height: height,
         fit: fit,
-        colorFilter: color != null ? ColorFilter.mode(color, BlendMode.srcIn) : null,
+        colorFilter: color != null
+            ? ColorFilter.mode(color, BlendMode.srcIn)
+            : null,
       );
     }
 

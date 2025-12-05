@@ -1,4 +1,3 @@
-import 'dart:convert';
 import '../datasources/dashboard_remote_datasource.dart';
 import '../models/telemetry_model.dart';
 import '../models/analytics_model.dart';
@@ -9,44 +8,54 @@ class DashboardRepository {
 
   DashboardRepository({required this.remoteDataSource});
 
-  Future<List<TelemetryModel>> getBikeTelemetry(String bikeId, {String? cursor}) async {
+  Future<List<TelemetryModel>> getBikeTelemetry(
+    String bikeId, {
+    String? cursor,
+  }) async {
     try {
-      final response = await remoteDataSource.getTelemetry(bikeId, cursor: cursor);
-      
-      // Map compact data to TelemetryModel
-      return response.data.map((row) {
-        // columns: ["uuid", "timestamp", "type", "val_primary", "payload"]
-        // row: ["<uuid>", "<timestamp>", "<type>", <val_primary>, "<payload_json_string>"]
-        
-        // Ensure row has enough elements
-        if (row.length < 5) return null;
+      final response = await remoteDataSource.getTelemetry(
+        bikeId,
+        cursor: cursor,
+      );
 
-        try {
-          return TelemetryModel(
-            uuid: row[0] as String,
-            timestamp: DateTime.parse(row[1] as String),
-            type: row[2] as String,
-            valPrimary: (row[3] as num?)?.toInt() ?? 0,
-            payload: row[4], // Assign raw payload (List or Map)
-          );
-        } catch (e) {
-          print("Error parsing row: $row");
-          print("Error details: $e");
-          return null;
-        }
-      }).whereType<TelemetryModel>().toList();
+      // Map compact data to TelemetryModel
+      return response.data
+          .map((row) {
+            // columns: ["uuid", "timestamp", "type", "val_primary", "payload"]
+            // row: ["<uuid>", "<timestamp>", "<type>", <val_primary>, "<payload_json_string>"]
+
+            // Ensure row has enough elements
+            if (row.length < 5) return null;
+
+            try {
+              return TelemetryModel(
+                uuid: row[0] as String,
+                timestamp: DateTime.parse(row[1] as String),
+                type: row[2] as String,
+                valPrimary: (row[3] as num?)?.toInt() ?? 0,
+                payload: row[4], // Assign raw payload (List or Map)
+              );
+            } catch (e) {
+              return null;
+            }
+          })
+          .whereType<TelemetryModel>()
+          .toList();
     } catch (e) {
       rethrow;
     }
   }
-  
+
   Future<AnalyticsResponse> getBikeAnalytics(String bikeId) async {
     return await remoteDataSource.getAnalytics(bikeId);
   }
 
   Future<List<BikeModel>> getBikes({String? cursor, int limit = 50}) async {
     try {
-      final response = await remoteDataSource.getBikes(cursor: cursor, limit: limit);
+      final response = await remoteDataSource.getBikes(
+        cursor: cursor,
+        limit: limit,
+      );
       return response.data;
     } catch (e) {
       rethrow;

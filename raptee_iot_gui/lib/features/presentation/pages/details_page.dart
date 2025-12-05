@@ -15,8 +15,6 @@ import '../../../core/theme/app_typography.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/chart_utils.dart';
 import '../widgets/custom_error_widget.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import '../../../core/constants/assets.dart';
 
 class DetailsPage extends StatelessWidget {
   final String bikeId;
@@ -30,8 +28,9 @@ class DetailsPage extends StatelessWidget {
     final repository = DashboardRepository(remoteDataSource: dataSource);
 
     return BlocProvider(
-      create: (context) => DashboardBloc(repository: repository)
-        ..add(DashboardLoadEvent(bikeId)),
+      create: (context) =>
+          DashboardBloc(repository: repository)
+            ..add(DashboardLoadEvent(bikeId)),
       child: _DetailsView(bikeId: bikeId),
     );
   }
@@ -55,12 +54,18 @@ class _DetailsViewState extends State<_DetailsView> {
       listener: (context, state) {
         if (state.deleteStatus == DeleteStatus.success) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Operation Successful"), backgroundColor: AppColors.success),
+            const SnackBar(
+              content: Text("Operation Successful"),
+              backgroundColor: AppColors.success,
+            ),
           );
           context.goNamed('dashboard');
         } else if (state.deleteStatus == DeleteStatus.failure) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.errorMessage ?? "Operation Failed"), backgroundColor: AppColors.error),
+            SnackBar(
+              content: Text(state.errorMessage ?? "Operation Failed"),
+              backgroundColor: AppColors.error,
+            ),
           );
         }
       },
@@ -73,7 +78,9 @@ class _DetailsViewState extends State<_DetailsView> {
             child: CustomErrorWidget(
               message: state.errorMessage ?? "Unknown error",
               title: "Error loading data",
-              onRetry: () => context.read<DashboardBloc>().add(DashboardLoadEvent(widget.bikeId)),
+              onRetry: () => context.read<DashboardBloc>().add(
+                DashboardLoadEvent(widget.bikeId),
+              ),
             ),
           );
         }
@@ -101,24 +108,35 @@ class _DetailsViewState extends State<_DetailsView> {
                       children: [
                         _buildSummaryCards(context, analytics.summary),
                         const SizedBox(height: 32),
-                        
+
                         _buildSectionTitle("Failure & High Latency Analysis"),
                         _buildFailureAnalysis(context, analytics.failures),
                         const SizedBox(height: 32),
 
-                        _buildSectionTitle("Latency Percentiles (Success Only)"),
+                        _buildSectionTitle(
+                          "Latency Percentiles (Success Only)",
+                        ),
                         _buildPercentilesChart(context, analytics.apiStats),
                         const SizedBox(height: 32),
 
                         _buildSectionTitle("Cellular Connectivity Overview"),
-                        _buildConnectivityOverview(context, analytics.connectivity),
+                        _buildConnectivityOverview(
+                          context,
+                          analytics.connectivity,
+                        ),
                         const SizedBox(height: 32),
 
                         _buildSectionTitle("Cellular Signal & Latency"),
-                        _buildSignalAnalysis(context, analytics.timeSeries, analytics.connectivity),
+                        _buildSignalAnalysis(
+                          context,
+                          analytics.timeSeries,
+                          analytics.connectivity,
+                        ),
                         const SizedBox(height: 32),
 
-                        _buildSectionTitle("General API Analysis (${_showSuccessOnly ? 'Success Only' : 'All Data'})"),
+                        _buildSectionTitle(
+                          "General API Analysis (${_showSuccessOnly ? 'Success Only' : 'All Data'})",
+                        ),
                         _buildGeneralApiAnalysis(context, analytics.timeSeries),
                         const SizedBox(height: 32),
 
@@ -140,7 +158,10 @@ class _DetailsViewState extends State<_DetailsView> {
   Widget _buildToggle() {
     return Row(
       children: [
-        Text("View Mode: ", style: AppTypography.body.copyWith(fontWeight: FontWeight.bold)),
+        Text(
+          "View Mode: ",
+          style: AppTypography.body.copyWith(fontWeight: FontWeight.bold),
+        ),
         const SizedBox(width: 12),
         SegmentedButton<bool>(
           segments: const [
@@ -161,20 +182,30 @@ class _DetailsViewState extends State<_DetailsView> {
   Widget _buildSectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
-      child: Text(title, style: AppTypography.h3.copyWith(color: Theme.of(context).colorScheme.primary)),
+      child: Text(
+        title,
+        style: AppTypography.h3.copyWith(
+          color: Theme.of(context).colorScheme.primary,
+        ),
+      ),
     );
   }
 
   // --- 1. Failure Analysis ---
-  Widget _buildFailureAnalysis(BuildContext context, List<FailureIncident> failures) {
+  Widget _buildFailureAnalysis(
+    BuildContext context,
+    List<FailureIncident> failures,
+  ) {
     if (failures.isEmpty) return const Text("No failures recorded.");
-    
+
     // Incident Count per API
     final Map<String, int> counts = {};
     for (var f in failures) {
       counts[f.apiName] = (counts[f.apiName] ?? 0) + 1;
     }
-    final countData = counts.entries.map((e) => _ChartData(e.key, e.value)).toList();
+    final countData = counts.entries
+        .map((e) => _ChartData(e.key, e.value))
+        .toList();
 
     // Prepare Y-Axis Categories for Scatter Plot
     final uniqueApis = failures.map((e) => e.apiName).toSet().toList();
@@ -185,7 +216,9 @@ class _DetailsViewState extends State<_DetailsView> {
         Row(
           children: [
             Expanded(
-              child: _buildChartContainer(context, "Incident Count per API", 
+              child: _buildChartContainer(
+                context,
+                "Incident Count per API",
                 SfCartesianChart(
                   primaryXAxis: CategoryAxis(),
                   series: <CartesianSeries>[
@@ -194,15 +227,19 @@ class _DetailsViewState extends State<_DetailsView> {
                       xValueMapper: (_ChartData data, _) => data.x,
                       yValueMapper: (_ChartData data, _) => data.y,
                       color: AppColors.error,
-                      dataLabelSettings: const DataLabelSettings(isVisible: true),
-                    )
+                      dataLabelSettings: const DataLabelSettings(
+                        isVisible: true,
+                      ),
+                    ),
                   ],
-                )
+                ),
               ),
             ),
             const SizedBox(width: 16),
             Expanded(
-              child: _buildChartContainer(context, "Incident Timeline", 
+              child: _buildChartContainer(
+                context,
+                "Incident Timeline",
                 SfCartesianChart(
                   primaryXAxis: DateTimeAxis(dateFormat: DateFormat.Hm()),
                   primaryYAxis: NumericAxis(
@@ -212,7 +249,10 @@ class _DetailsViewState extends State<_DetailsView> {
                     axisLabelFormatter: (AxisLabelRenderDetails args) {
                       final index = args.value.round();
                       if (index >= 0 && index < uniqueApis.length) {
-                        return ChartAxisLabel(uniqueApis[index], args.textStyle);
+                        return ChartAxisLabel(
+                          uniqueApis[index],
+                          args.textStyle,
+                        );
                       }
                       return ChartAxisLabel('', args.textStyle);
                     },
@@ -221,18 +261,22 @@ class _DetailsViewState extends State<_DetailsView> {
                   series: <CartesianSeries>[
                     ScatterSeries<FailureIncident, DateTime>(
                       dataSource: failures,
-                      xValueMapper: (FailureIncident f, _) => DateTime.parse(f.timestamp),
-                      yValueMapper: (FailureIncident f, _) => uniqueApis.indexOf(f.apiName),
+                      xValueMapper: (FailureIncident f, _) =>
+                          DateTime.parse(f.timestamp),
+                      yValueMapper: (FailureIncident f, _) =>
+                          uniqueApis.indexOf(f.apiName),
                       pointColorMapper: (FailureIncident f, _) {
                         if (f.type.contains("Network")) return Colors.red;
                         if (f.type.contains("Server")) return Colors.orange;
-                        if (f.type.contains("High Latency")) return Colors.purple;
+                        if (f.type.contains("High Latency")) {
+                          return Colors.purple;
+                        }
                         return Colors.grey;
                       },
                       name: 'Incidents',
-                    )
+                    ),
                   ],
-                )
+                ),
               ),
             ),
           ],
@@ -243,25 +287,52 @@ class _DetailsViewState extends State<_DetailsView> {
 
   // --- 2. Percentiles ---
   Widget _buildPercentilesChart(BuildContext context, List<APIStat> stats) {
-    return _buildChartContainer(context, "Latency Percentiles (ms)", 
+    return _buildChartContainer(
+      context,
+      "Latency Percentiles (ms)",
       SfCartesianChart(
         primaryXAxis: CategoryAxis(labelRotation: -45),
         legend: Legend(isVisible: true, position: LegendPosition.bottom),
         tooltipBehavior: TooltipBehavior(enable: true),
         series: <CartesianSeries>[
-          ColumnSeries<APIStat, String>(dataSource: stats, xValueMapper: (s, _) => s.apiName, yValueMapper: (s, _) => s.p50, name: 'P50'),
-          ColumnSeries<APIStat, String>(dataSource: stats, xValueMapper: (s, _) => s.apiName, yValueMapper: (s, _) => s.p90, name: 'P90'),
-          ColumnSeries<APIStat, String>(dataSource: stats, xValueMapper: (s, _) => s.apiName, yValueMapper: (s, _) => s.p95, name: 'P95'),
-          ColumnSeries<APIStat, String>(dataSource: stats, xValueMapper: (s, _) => s.apiName, yValueMapper: (s, _) => s.p99, name: 'P99'),
+          ColumnSeries<APIStat, String>(
+            dataSource: stats,
+            xValueMapper: (s, _) => s.apiName,
+            yValueMapper: (s, _) => s.p50,
+            name: 'P50',
+          ),
+          ColumnSeries<APIStat, String>(
+            dataSource: stats,
+            xValueMapper: (s, _) => s.apiName,
+            yValueMapper: (s, _) => s.p90,
+            name: 'P90',
+          ),
+          ColumnSeries<APIStat, String>(
+            dataSource: stats,
+            xValueMapper: (s, _) => s.apiName,
+            yValueMapper: (s, _) => s.p95,
+            name: 'P95',
+          ),
+          ColumnSeries<APIStat, String>(
+            dataSource: stats,
+            xValueMapper: (s, _) => s.apiName,
+            yValueMapper: (s, _) => s.p99,
+            name: 'P99',
+          ),
         ],
-      )
+      ),
     );
   }
 
   // --- 3. Connectivity Overview ---
-  Widget _buildConnectivityOverview(BuildContext context, ConnectivityStats stats) {
-    final failureData = stats.failureRateByState.entries.map((e) => _ChartData(e.key, e.value)).toList();
-    
+  Widget _buildConnectivityOverview(
+    BuildContext context,
+    ConnectivityStats stats,
+  ) {
+    final failureData = stats.failureRateByState.entries
+        .map((e) => _ChartData(e.key, e.value))
+        .toList();
+
     // Box Plot Data Preparation
     // Syncfusion BoxAndWhiskerSeries needs a list of objects, and xValueMapper/yValueMapper (list of values)
     final List<_BoxPlotData> boxData = stats.latencyByState.entries.map((e) {
@@ -275,12 +346,18 @@ class _DetailsViewState extends State<_DetailsView> {
           children: [
             Expanded(
               flex: 1,
-              child: _buildStatCardTable(context, "State Statistics", stats.stateDistribution),
+              child: _buildStatCardTable(
+                context,
+                "State Statistics",
+                stats.stateDistribution,
+              ),
             ),
             const SizedBox(width: 16),
             Expanded(
               flex: 2,
-              child: _buildChartContainer(context, "Connection State Distribution", 
+              child: _buildChartContainer(
+                context,
+                "Connection State Distribution",
                 SfCircularChart(
                   legend: Legend(isVisible: true),
                   series: <CircularSeries>[
@@ -288,10 +365,12 @@ class _DetailsViewState extends State<_DetailsView> {
                       dataSource: stats.stateDistribution.entries.toList(),
                       xValueMapper: (e, _) => e.key,
                       yValueMapper: (e, _) => e.value,
-                      dataLabelSettings: const DataLabelSettings(isVisible: true),
-                    )
+                      dataLabelSettings: const DataLabelSettings(
+                        isVisible: true,
+                      ),
+                    ),
                   ],
-                )
+                ),
               ),
             ),
           ],
@@ -300,7 +379,9 @@ class _DetailsViewState extends State<_DetailsView> {
         Row(
           children: [
             Expanded(
-              child: _buildChartContainer(context, "Failure Rate by State (%)", 
+              child: _buildChartContainer(
+                context,
+                "Failure Rate by State (%)",
                 SfCartesianChart(
                   primaryXAxis: CategoryAxis(),
                   series: <CartesianSeries>[
@@ -309,15 +390,20 @@ class _DetailsViewState extends State<_DetailsView> {
                       xValueMapper: (d, _) => d.x,
                       yValueMapper: (d, _) => d.y,
                       color: AppColors.error,
-                      dataLabelSettings: const DataLabelSettings(isVisible: true, labelPosition: ChartDataLabelPosition.outside),
-                    )
+                      dataLabelSettings: const DataLabelSettings(
+                        isVisible: true,
+                        labelPosition: ChartDataLabelPosition.outside,
+                      ),
+                    ),
                   ],
-                )
+                ),
               ),
             ),
             const SizedBox(width: 16),
             Expanded(
-              child: _buildChartContainer(context, "Latency Dist by State", 
+              child: _buildChartContainer(
+                context,
+                "Latency Dist by State",
                 SfCartesianChart(
                   primaryXAxis: CategoryAxis(),
                   primaryYAxis: NumericAxis(title: AxisTitle(text: 'ms')),
@@ -327,9 +413,9 @@ class _DetailsViewState extends State<_DetailsView> {
                       xValueMapper: (d, _) => d.x,
                       yValueMapper: (d, _) => d.y,
                       boxPlotMode: BoxPlotMode.normal,
-                    )
+                    ),
                   ],
-                )
+                ),
               ),
             ),
           ],
@@ -339,12 +425,20 @@ class _DetailsViewState extends State<_DetailsView> {
   }
 
   // --- 4. Signal Analysis ---
-  Widget _buildSignalAnalysis(BuildContext context, List<TimeSeriesPoint> timeSeries, ConnectivityStats connStats) {
+  Widget _buildSignalAnalysis(
+    BuildContext context,
+    List<TimeSeriesPoint> timeSeries,
+    ConnectivityStats connStats,
+  ) {
     final validSignal = timeSeries.where((t) => t.signalStrength > 0).toList();
-    
-    return _buildChartContainer(context, "Signal Strength vs Latency", 
+
+    return _buildChartContainer(
+      context,
+      "Signal Strength vs Latency",
       SfCartesianChart(
-        primaryXAxis: NumericAxis(title: AxisTitle(text: 'Signal Strength (%)')),
+        primaryXAxis: NumericAxis(
+          title: AxisTitle(text: 'Signal Strength (%)'),
+        ),
         primaryYAxis: NumericAxis(title: AxisTitle(text: 'Latency (ms)')),
         legend: Legend(isVisible: true),
         series: <CartesianSeries>[
@@ -352,31 +446,42 @@ class _DetailsViewState extends State<_DetailsView> {
             dataSource: validSignal,
             xValueMapper: (t, _) => t.signalStrength,
             yValueMapper: (t, _) => t.latency,
-            pointColorMapper: (t, _) => t.connectionState == 'WiFi' ? Colors.blue : Colors.green,
+            pointColorMapper: (t, _) =>
+                t.connectionState == 'WiFi' ? Colors.blue : Colors.green,
             name: 'Calls',
-          )
+          ),
         ],
-      )
+      ),
     );
   }
 
   // --- 5. General API Analysis (Dynamic) ---
-  Widget _buildGeneralApiAnalysis(BuildContext context, List<TimeSeriesPoint> rawData) {
+  Widget _buildGeneralApiAnalysis(
+    BuildContext context,
+    List<TimeSeriesPoint> rawData,
+  ) {
     // Filter Data
-    final data = _showSuccessOnly ? rawData.where((t) => t.status == 200).toList() : rawData;
-    
+    final data = _showSuccessOnly
+        ? rawData.where((t) => t.status == 200).toList()
+        : rawData;
+
     // 1. Latency Distribution (Box Plot)
     final Map<String, List<double>> apiLatencies = {};
     for (var t in data) {
       if (!apiLatencies.containsKey(t.apiName)) apiLatencies[t.apiName] = [];
       apiLatencies[t.apiName]!.add(t.latency.toDouble());
     }
-    final boxData = apiLatencies.entries.map((e) => _BoxPlotData(e.key, e.value)).toList();
+    final boxData = apiLatencies.entries
+        .map((e) => _BoxPlotData(e.key, e.value))
+        .toList();
 
     // 2. Latency Over Time
     // Downsample for performance
-    final sortedData = List<TimeSeriesPoint>.from(data)..sort((a, b) => a.timestamp.compareTo(b.timestamp));
-    final timeData = sortedData.map((e) => MapEntry(DateTime.parse(e.timestamp), e.latency.toDouble())).toList();
+    final sortedData = List<TimeSeriesPoint>.from(data)
+      ..sort((a, b) => a.timestamp.compareTo(b.timestamp));
+    final timeData = sortedData
+        .map((e) => MapEntry(DateTime.parse(e.timestamp), e.latency.toDouble()))
+        .toList();
     final sampledTimeData = ChartUtils.downsampleTimeSeries(timeData, 150);
 
     // 3. Average Latency
@@ -387,30 +492,34 @@ class _DetailsViewState extends State<_DetailsView> {
 
     // 4. Status Code Distribution
     final Map<String, Map<int, int>> statusDist = {};
-    for (var t in rawData) { // Always show all status codes for distribution context? Or filter? User asked for toggle effect.
-       // If toggle is "Success Only", status dist is boring (100% 200). 
-       // So for Status Dist, maybe we should ALWAYS show all, or respect toggle.
-       // User said "API Call Status Code Distribution" in the list.
-       // If I respect toggle, and toggle is success only, it's just one bar.
-       // I'll respect the toggle for consistency, but it might be empty if filtered.
-       // Actually, let's use rawData for Status Dist if user wants to see errors.
-       // But wait, "General API Analysis (Affected by Toggle)".
-       // I will use `data` (filtered).
-       if (!statusDist.containsKey(t.apiName)) statusDist[t.apiName] = {};
-       statusDist[t.apiName]![t.status] = (statusDist[t.apiName]![t.status] ?? 0) + 1;
+    for (var t in rawData) {
+      // Always show all status codes for distribution context? Or filter? User asked for toggle effect.
+      // If toggle is "Success Only", status dist is boring (100% 200).
+      // So for Status Dist, maybe we should ALWAYS show all, or respect toggle.
+      // User said "API Call Status Code Distribution" in the list.
+      // If I respect toggle, and toggle is success only, it's just one bar.
+      // I'll respect the toggle for consistency, but it might be empty if filtered.
+      // Actually, let's use rawData for Status Dist if user wants to see errors.
+      // But wait, "General API Analysis (Affected by Toggle)".
+      // I will use `data` (filtered).
+      if (!statusDist.containsKey(t.apiName)) statusDist[t.apiName] = {};
+      statusDist[t.apiName]![t.status] =
+          (statusDist[t.apiName]![t.status] ?? 0) + 1;
     }
-    
-    // Prepare Stacked Data is complex with dynamic status codes. 
+
+    // Prepare Stacked Data is complex with dynamic status codes.
     // Simplified: Grouped Bar of Status Codes? Or just a simple count plot?
     // Let's do a simple Stacked Column 100% if possible, or just a table/chart.
     // For simplicity and robustness: StackedColumnSeries for common codes (200, 0, 500, 400, others).
-    
+
     return Column(
       children: [
         Row(
           children: [
             Expanded(
-              child: _buildChartContainer(context, "Latency Distribution", 
+              child: _buildChartContainer(
+                context,
+                "Latency Distribution",
                 SfCartesianChart(
                   primaryXAxis: CategoryAxis(labelRotation: -45),
                   primaryYAxis: NumericAxis(title: AxisTitle(text: 'ms')),
@@ -420,14 +529,16 @@ class _DetailsViewState extends State<_DetailsView> {
                       xValueMapper: (d, _) => d.x,
                       yValueMapper: (d, _) => d.y,
                       boxPlotMode: BoxPlotMode.normal,
-                    )
+                    ),
                   ],
-                )
+                ),
               ),
             ),
             const SizedBox(width: 16),
             Expanded(
-              child: _buildChartContainer(context, "Latency Over Time", 
+              child: _buildChartContainer(
+                context,
+                "Latency Over Time",
                 SfCartesianChart(
                   primaryXAxis: DateTimeAxis(dateFormat: DateFormat.Hms()),
                   primaryYAxis: NumericAxis(title: AxisTitle(text: 'ms')),
@@ -437,9 +548,9 @@ class _DetailsViewState extends State<_DetailsView> {
                       xValueMapper: (d, _) => d.key,
                       yValueMapper: (d, _) => d.value,
                       name: 'Latency',
-                    )
+                    ),
                   ],
-                )
+                ),
               ),
             ),
           ],
@@ -448,7 +559,9 @@ class _DetailsViewState extends State<_DetailsView> {
         Row(
           children: [
             Expanded(
-              child: _buildChartContainer(context, "Average Latency", 
+              child: _buildChartContainer(
+                context,
+                "Average Latency",
                 SfCartesianChart(
                   primaryXAxis: CategoryAxis(labelRotation: -45),
                   series: <CartesianSeries>[
@@ -456,20 +569,26 @@ class _DetailsViewState extends State<_DetailsView> {
                       dataSource: avgData,
                       xValueMapper: (d, _) => d.x,
                       yValueMapper: (d, _) => d.y,
-                      dataLabelSettings: const DataLabelSettings(isVisible: true),
-                    )
+                      dataLabelSettings: const DataLabelSettings(
+                        isVisible: true,
+                      ),
+                    ),
                   ],
-                )
+                ),
               ),
             ),
             const SizedBox(width: 16),
-             Expanded(
-              child: _buildChartContainer(context, "Status Code Dist (All Data)", 
+            Expanded(
+              child: _buildChartContainer(
+                context,
+                "Status Code Dist (All Data)",
                 SfCartesianChart(
                   primaryXAxis: CategoryAxis(labelRotation: -45),
                   legend: Legend(isVisible: true),
-                  series: _buildStatusSeries(rawData), // Always show all for status dist
-                )
+                  series: _buildStatusSeries(
+                    rawData,
+                  ), // Always show all for status dist
+                ),
               ),
             ),
           ],
@@ -482,7 +601,7 @@ class _DetailsViewState extends State<_DetailsView> {
     // Group by API and Status
     final Map<String, Map<int, int>> counts = {};
     final Set<int> allStatuses = {};
-    
+
     for (var t in data) {
       if (!counts.containsKey(t.apiName)) counts[t.apiName] = {};
       counts[t.apiName]![t.status] = (counts[t.apiName]![t.status] ?? 0) + 1;
@@ -497,14 +616,14 @@ class _DetailsViewState extends State<_DetailsView> {
       for (var api in apis) {
         statusData.add(_ChartData(api, (counts[api]![status] ?? 0).toDouble()));
       }
-      
+
       series.add(
         StackedColumnSeries<_ChartData, String>(
           dataSource: statusData,
           xValueMapper: (d, _) => d.x,
           yValueMapper: (d, _) => d.y,
           name: status.toString(),
-        )
+        ),
       );
     }
     return series;
@@ -512,7 +631,11 @@ class _DetailsViewState extends State<_DetailsView> {
 
   // --- Helpers ---
 
-  Widget _buildChartContainer(BuildContext context, String title, Widget chart) {
+  Widget _buildChartContainer(
+    BuildContext context,
+    String title,
+    Widget chart,
+  ) {
     final theme = Theme.of(context);
     return Container(
       height: 350,
@@ -525,7 +648,12 @@ class _DetailsViewState extends State<_DetailsView> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: AppTypography.h4.copyWith(color: theme.colorScheme.onSurface)),
+          Text(
+            title,
+            style: AppTypography.h4.copyWith(
+              color: theme.colorScheme.onSurface,
+            ),
+          ),
           const SizedBox(height: 16),
           Expanded(child: chart),
         ],
@@ -533,7 +661,11 @@ class _DetailsViewState extends State<_DetailsView> {
     );
   }
 
-  Widget _buildStatCardTable(BuildContext context, String title, Map<String, int> data) {
+  Widget _buildStatCardTable(
+    BuildContext context,
+    String title,
+    Map<String, int> data,
+  ) {
     final theme = Theme.of(context);
     return Container(
       height: 350,
@@ -546,12 +678,18 @@ class _DetailsViewState extends State<_DetailsView> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: AppTypography.h4.copyWith(color: theme.colorScheme.onSurface)),
+          Text(
+            title,
+            style: AppTypography.h4.copyWith(
+              color: theme.colorScheme.onSurface,
+            ),
+          ),
           const SizedBox(height: 16),
           Expanded(
             child: ListView.separated(
               itemCount: data.length,
-              separatorBuilder: (_, __) => Divider(height: 1, color: theme.dividerColor),
+              separatorBuilder: (_, __) =>
+                  Divider(height: 1, color: theme.dividerColor),
               itemBuilder: (context, index) {
                 final key = data.keys.elementAt(index);
                 final value = data.values.elementAt(index);
@@ -561,7 +699,12 @@ class _DetailsViewState extends State<_DetailsView> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(key, style: AppTypography.body),
-                      Text(value.toString(), style: AppTypography.mono.copyWith(fontWeight: FontWeight.bold)),
+                      Text(
+                        value.toString(),
+                        style: AppTypography.mono.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ],
                   ),
                 );
@@ -580,15 +723,28 @@ class _DetailsViewState extends State<_DetailsView> {
         Row(
           children: [
             IconButton(
-              icon: Icon(TablerIcons.arrow_left, color: Theme.of(context).colorScheme.onSurfaceVariant),
+              icon: Icon(
+                TablerIcons.arrow_left,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
               onPressed: () => context.goNamed('dashboard'),
             ),
             const SizedBox(width: 8),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("Analytics Dashboard", style: AppTypography.caption.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
-                Text(state.bikeId, style: AppTypography.h2.copyWith(color: Theme.of(context).colorScheme.onSurface)),
+                Text(
+                  "Analytics Dashboard",
+                  style: AppTypography.caption.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                Text(
+                  state.bikeId,
+                  style: AppTypography.h2.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
               ],
             ),
           ],
@@ -599,7 +755,9 @@ class _DetailsViewState extends State<_DetailsView> {
               onPressed: () {
                 final currentState = context.read<DashboardBloc>().state;
                 if (currentState.bikeId.isNotEmpty) {
-                  context.read<DashboardBloc>().add(DashboardLoadEvent(currentState.bikeId));
+                  context.read<DashboardBloc>().add(
+                    DashboardLoadEvent(currentState.bikeId),
+                  );
                 }
               },
               icon: const Icon(TablerIcons.refresh, size: 18),
@@ -608,7 +766,10 @@ class _DetailsViewState extends State<_DetailsView> {
                 backgroundColor: Theme.of(context).colorScheme.surface,
                 foregroundColor: Theme.of(context).colorScheme.onSurface,
                 elevation: 0,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                   side: BorderSide(color: Theme.of(context).dividerColor),
@@ -626,14 +787,24 @@ class _DetailsViewState extends State<_DetailsView> {
   Widget _buildActions(BuildContext context, DashboardState state) {
     final theme = Theme.of(context);
     return PopupMenuButton<String>(
-      icon: Icon(TablerIcons.dots_vertical, color: theme.colorScheme.onSurfaceVariant),
+      icon: Icon(
+        TablerIcons.dots_vertical,
+        color: theme.colorScheme.onSurfaceVariant,
+      ),
       color: theme.colorScheme.surface,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8), side: BorderSide(color: theme.dividerColor)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+        side: BorderSide(color: theme.dividerColor),
+      ),
       onSelected: (value) {
         if (value == 'delete_telemetry') {
-          context.read<DashboardBloc>().add(DashboardDeleteTelemetryEvent(state.bikeId));
+          context.read<DashboardBloc>().add(
+            DashboardDeleteTelemetryEvent(state.bikeId),
+          );
         } else if (value == 'delete_bike') {
-          context.read<DashboardBloc>().add(DashboardDeleteBikeEvent(state.bikeId));
+          context.read<DashboardBloc>().add(
+            DashboardDeleteBikeEvent(state.bikeId),
+          );
         }
       },
       itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
@@ -643,7 +814,12 @@ class _DetailsViewState extends State<_DetailsView> {
             children: [
               const Icon(TablerIcons.trash, size: 18, color: AppColors.warning),
               const SizedBox(width: 12),
-              Text('Delete Telemetry', style: AppTypography.body.copyWith(color: theme.colorScheme.onSurface)),
+              Text(
+                'Delete Telemetry',
+                style: AppTypography.body.copyWith(
+                  color: theme.colorScheme.onSurface,
+                ),
+              ),
             ],
           ),
         ),
@@ -653,7 +829,12 @@ class _DetailsViewState extends State<_DetailsView> {
             children: [
               const Icon(TablerIcons.trash_x, size: 18, color: AppColors.error),
               const SizedBox(width: 12),
-              Text('Delete Bike', style: AppTypography.body.copyWith(color: theme.colorScheme.onSurface)),
+              Text(
+                'Delete Bike',
+                style: AppTypography.body.copyWith(
+                  color: theme.colorScheme.onSurface,
+                ),
+              ),
             ],
           ),
         ),
@@ -664,18 +845,56 @@ class _DetailsViewState extends State<_DetailsView> {
   Widget _buildSummaryCards(BuildContext context, AnalyticsSummary summary) {
     return Row(
       children: [
-        Expanded(child: _buildStatCard(context, "Total Calls", summary.totalCalls.toString(), TablerIcons.server, Colors.blue)),
+        Expanded(
+          child: _buildStatCard(
+            context,
+            "Total Calls",
+            summary.totalCalls.toString(),
+            TablerIcons.server,
+            Colors.blue,
+          ),
+        ),
         const SizedBox(width: 16),
-        Expanded(child: _buildStatCard(context, "Success Rate", "${summary.successRate.toStringAsFixed(1)}%", TablerIcons.check, Colors.green)),
+        Expanded(
+          child: _buildStatCard(
+            context,
+            "Success Rate",
+            "${summary.successRate.toStringAsFixed(1)}%",
+            TablerIcons.check,
+            Colors.green,
+          ),
+        ),
         const SizedBox(width: 16),
-        Expanded(child: _buildStatCard(context, "Network Errors", "${summary.networkErrorRate.toStringAsFixed(1)}%", TablerIcons.wifi_off, Colors.red)),
+        Expanded(
+          child: _buildStatCard(
+            context,
+            "Network Errors",
+            "${summary.networkErrorRate.toStringAsFixed(1)}%",
+            TablerIcons.wifi_off,
+            Colors.red,
+          ),
+        ),
         const SizedBox(width: 16),
-        Expanded(child: _buildStatCard(context, "Server Errors", "${summary.serverErrorRate.toStringAsFixed(1)}%", TablerIcons.alert_triangle, Colors.orange)),
+        Expanded(
+          child: _buildStatCard(
+            context,
+            "Server Errors",
+            "${summary.serverErrorRate.toStringAsFixed(1)}%",
+            TablerIcons.alert_triangle,
+            Colors.orange,
+          ),
+        ),
       ],
     );
   }
 
-  Widget _buildStatCard(BuildContext context, String title, String value, IconData icon, Color color) {
+  Widget _buildStatCard(
+    BuildContext context,
+    String title,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
     final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(20),
@@ -690,12 +909,23 @@ class _DetailsViewState extends State<_DetailsView> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(title, style: AppTypography.caption.copyWith(color: theme.colorScheme.onSurfaceVariant), overflow: TextOverflow.ellipsis),
+              Text(
+                title,
+                style: AppTypography.caption.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
               Icon(icon, color: color, size: 20),
             ],
           ),
           const SizedBox(height: 12),
-          Text(value, style: AppTypography.h3.copyWith(color: theme.colorScheme.onSurface)),
+          Text(
+            value,
+            style: AppTypography.h3.copyWith(
+              color: theme.colorScheme.onSurface,
+            ),
+          ),
         ],
       ),
     );
@@ -716,7 +946,12 @@ class _DetailsViewState extends State<_DetailsView> {
         children: [
           Padding(
             padding: const EdgeInsets.all(20),
-            child: Text("API Performance Statistics", style: AppTypography.h4.copyWith(color: theme.colorScheme.onSurface)),
+            child: Text(
+              "API Performance Statistics",
+              style: AppTypography.h4.copyWith(
+                color: theme.colorScheme.onSurface,
+              ),
+            ),
           ),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
@@ -730,18 +965,39 @@ class _DetailsViewState extends State<_DetailsView> {
                 DataColumn(label: Text("Error Rate"), numeric: true),
               ],
               rows: apiStats.map((stat) {
-                return DataRow(cells: [
-                  DataCell(Text(stat.apiName, style: AppTypography.body)),
-                  DataCell(Text(stat.count.toString(), style: AppTypography.mono)),
-                  DataCell(Text(stat.mean.toStringAsFixed(0), style: AppTypography.mono)),
-                  DataCell(Text(stat.p99.toStringAsFixed(0), style: AppTypography.mono)),
-                  DataCell(Text(stat.max.toString(), style: AppTypography.mono)),
-                  DataCell(Text("${stat.errorRate.toStringAsFixed(1)}%", 
-                    style: AppTypography.mono.copyWith(
-                      color: stat.errorRate > 0 ? AppColors.error : AppColors.success
-                    )
-                  )),
-                ]);
+                return DataRow(
+                  cells: [
+                    DataCell(Text(stat.apiName, style: AppTypography.body)),
+                    DataCell(
+                      Text(stat.count.toString(), style: AppTypography.mono),
+                    ),
+                    DataCell(
+                      Text(
+                        stat.mean.toStringAsFixed(0),
+                        style: AppTypography.mono,
+                      ),
+                    ),
+                    DataCell(
+                      Text(
+                        stat.p99.toStringAsFixed(0),
+                        style: AppTypography.mono,
+                      ),
+                    ),
+                    DataCell(
+                      Text(stat.max.toString(), style: AppTypography.mono),
+                    ),
+                    DataCell(
+                      Text(
+                        "${stat.errorRate.toStringAsFixed(1)}%",
+                        style: AppTypography.mono.copyWith(
+                          color: stat.errorRate > 0
+                              ? AppColors.error
+                              : AppColors.success,
+                        ),
+                      ),
+                    ),
+                  ],
+                );
               }).toList(),
             ),
           ),

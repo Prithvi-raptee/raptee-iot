@@ -6,7 +6,7 @@ part 'bike_model.g.dart';
 @freezed
 class BikeModel with _$BikeModel {
   const factory BikeModel({
-    @JsonKey(name: 'bike_id') required String bikeId,
+    required String bikeId,
     required Map<String, dynamic> metadata,
   }) = _BikeModel;
 
