@@ -130,6 +130,32 @@ Deletes **only** the telemetry logs for a specific bike. The bike registry remai
 }
 ```
 
+### 6. Get Analytics
+**GET** `/api/v1/analytics`
+
+Retrieves analytics data for a specific bike.
+
+**Query Parameters:**
+-   `bike_id`: (Required) The ID of the bike.
+
+**Response:**
+Returns a JSON object with summary, API stats, connectivity stats, failures, and time series data.
+
+### 7. Delete Bikes (Bulk)
+**DELETE** `/api/v1/bikes`
+
+Deletes multiple bikes or a single bike.
+
+**Request Body (Bulk):**
+```json
+{
+    "bike_ids": ["bike_1", "bike_2"]
+}
+```
+
+**Query Parameters (Single):**
+-   `bike_id`: The ID of the bike.
+
 ## Testing
 
 The project includes a comprehensive test script to verify all endpoints.

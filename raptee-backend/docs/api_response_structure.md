@@ -230,3 +230,135 @@ This document outlines the response structures for the available APIs in the Rap
       "error": "Failed to delete telemetry: <error_details>"
     }
     ```
+
+## 8. Get Analytics
+
+*   **Endpoint:** `GET /api/v1/analytics`
+*   **URL Construction:** `{{BASE_URL}}/api/v1/analytics?bike_id=<bike_id>`
+*   **Description:** Retrieves analytics data for a specific bike, including summary, API stats, connectivity, failures, and time series.
+*   **Query Parameters:**
+    *   `bike_id` (required): The ID of the bike.
+
+### Success Response (200 OK)
+
+```json
+{
+  "bike_id": "<bike_id>",
+  "summary": {
+    "total_calls": 100,
+    "success_rate": 95.5,
+    "network_error_rate": 2.0,
+    "server_error_rate": 1.5,
+    "client_error_rate": 1.0,
+    "start_time": "2023-10-27T10:00:00Z",
+    "end_time": "2023-10-27T12:00:00Z"
+  },
+  "api_stats": [
+    {
+      "api_name": "https://api.example.com/v1/data",
+      "count": 50,
+      "mean": 120.5,
+      "max": 500,
+      "min": 50,
+      "error_rate": 0.0,
+      "p50": 100,
+      "p90": 200,
+      "p95": 250,
+      "p99": 400
+    }
+  ],
+  "connectivity_stats": {
+    "state_distribution": {
+      "WiFi": 80,
+      "Cellular": 20
+    },
+    "failure_rate_by_state": {
+      "WiFi": 1.2,
+      "Cellular": 5.0
+    },
+    "latency_by_state": {
+      "WiFi": [100, 110, ...],
+      "Cellular": [200, 220, ...]
+    }
+  },
+  "failures": [
+    {
+      "timestamp": "2023-10-27T10:05:00Z",
+      "api_name": "https://api.example.com/v1/data",
+      "status_code": 500,
+      "latency": 50,
+      "type": "Server Error"
+    }
+  ],
+  "time_series": [
+    {
+      "timestamp": "2023-10-27T10:00:00Z",
+      "latency": 120,
+      "api_name": "https://api.example.com/v1/data",
+      "status": 200,
+      "signal_strength": 80,
+      "connection_state": "WiFi"
+    }
+  ]
+}
+```
+
+### Error Responses
+
+*   **400 Bad Request:**
+    ```json
+    {
+      "error": "bike_id is required"
+    }
+    ```
+*   **500 Internal Server Error:**
+    ```json
+    {
+      "error": "Database error: <error_details>"
+    }
+    ```
+
+## 9. Delete Bikes (Bulk)
+
+*   **Endpoint:** `DELETE /api/v1/bikes`
+*   **URL Construction:** `{{BASE_URL}}/api/v1/bikes`
+*   **Description:** Deletes multiple bikes or a single bike.
+*   **Request Body (Bulk):**
+    ```json
+    {
+      "bike_ids": ["bike_1", "bike_2"]
+    }
+    ```
+*   **Query Parameters (Single):**
+    *   `bike_id`: The ID of the bike to delete.
+
+### Success Response (200 OK)
+
+```json
+{
+  "status": "deleted",
+  "count": 2
+}
+```
+OR
+```json
+{
+  "status": "deleted",
+  "bike_id": "bike_1"
+}
+```
+
+### Error Responses
+
+*   **400 Bad Request:**
+    ```json
+    {
+      "error": "bike_id query param or bike_ids json body required"
+    }
+    ```
+*   **500 Internal Server Error:**
+    ```json
+    {
+      "error": "Failed to delete bikes: <error_details>"
+    }
+    ```

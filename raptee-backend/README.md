@@ -9,6 +9,10 @@ This project is documented in detail in the following files:
 -   **[SCHEMA.md](docs/SCHEMA.md)**: Database Design, ER Diagrams, and Global Schema definitions.
 -   **[BACKEND.md](docs/BACKEND.md)**: API Reference, Data Flow, and Deployment details.
 
+## Production URL
+
+Base URL: `https://n4gzvnxn5h.ap-south-1.awsapprunner.com`
+
 ## Available Endpoints
 
 | Method | Endpoint | Description |
@@ -18,6 +22,8 @@ This project is documented in detail in the following files:
 | `POST` | `/api/v1/provision` | Provision or update a bike. |
 | `GET` | `/api/v1/bikes` | List all bikes. |
 | `GET` | `/api/v1/telemetry` | Read telemetry data. |
+| `GET` | `/api/v1/analytics` | Get bike analytics. |
+| `DELETE` | `/api/v1/bikes` | Delete bikes (Bulk/Single). |
 | `DELETE` | `/api/v1/provision` | Delete a bike and its data. |
 | `DELETE` | `/api/v1/telemetry` | Delete telemetry data for a bike. |
 
