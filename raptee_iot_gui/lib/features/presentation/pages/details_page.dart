@@ -15,7 +15,8 @@ import '../../../core/theme/app_typography.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/chart_utils.dart';
 import '../widgets/custom_error_widget.dart';
-import 'dart:math' as math;
+import 'package:flutter_svg/flutter_svg.dart';
+import '../../../core/constants/assets.dart';
 
 class DetailsPage extends StatelessWidget {
   final String bikeId;

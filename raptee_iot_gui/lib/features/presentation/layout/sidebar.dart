@@ -3,6 +3,8 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import '../../../core/constants/assets.dart';
 
 class Sidebar extends StatelessWidget {
   const Sidebar({super.key});
@@ -28,7 +30,7 @@ class Sidebar extends StatelessWidget {
             decoration: BoxDecoration(
               border: Border(bottom: BorderSide(color: theme.dividerColor)),
             ),
-            child: Icon(TablerIcons.bolt, color: theme.colorScheme.primary, size: 28),
+            child: SvgPicture.asset(Assets.logo(context), height: 28),
           ),
 
           const SizedBox(height: 16),

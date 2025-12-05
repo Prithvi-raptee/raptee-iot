@@ -47,7 +47,8 @@ flutter:
 
 
   assets:
-    - assets/images/error_illustration.png
+    - assets/images/
+    - assets/svg/
   #   - images/a_dot_ham.jpeg
 
 
