@@ -25,3 +25,8 @@ type BikeListResponse struct {
 	NextCursor string `json:"next_cursor"`
 	Data       []Bike `json:"data"`
 }
+
+// DeleteRequest represents the structure for bulk delete requests
+type DeleteRequest struct {
+	BikeIDs []string `json:"bike_ids"`
+}
