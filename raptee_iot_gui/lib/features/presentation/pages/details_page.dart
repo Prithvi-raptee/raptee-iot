@@ -220,32 +220,69 @@ class _DetailsViewState extends State<_DetailsView> {
                 context,
                 "Incident Count per API",
                 SfCartesianChart(
-                  primaryXAxis: CategoryAxis(),
+                  plotAreaBorderWidth: 0,
+                  primaryXAxis: CategoryAxis(
+                    majorGridLines: const MajorGridLines(width: 0),
+                    axisLine: const AxisLine(width: 0),
+                  ),
+                  primaryYAxis: NumericAxis(
+                    majorGridLines: MajorGridLines(
+                      width: 1,
+                      color: Theme.of(context).dividerColor.withOpacity(0.3),
+                      dashArray: const <double>[5, 5],
+                    ),
+                    axisLine: const AxisLine(width: 0),
+                  ),
+                  tooltipBehavior: TooltipBehavior(
+                    enable: true,
+                    header: '',
+                    canShowMarker: false,
+                    format: 'point.x : point.y',
+                    color: Theme.of(context).colorScheme.surface,
+                    textStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                    shadowColor: Colors.black26,
+                    elevation: 5,
+                  ),
                   series: <CartesianSeries>[
                     BarSeries<_ChartData, String>(
                       dataSource: countData,
                       xValueMapper: (_ChartData data, _) => data.x,
                       yValueMapper: (_ChartData data, _) => data.y,
                       color: AppColors.error,
+                      borderRadius: const BorderRadius.all(Radius.circular(4)),
                       dataLabelSettings: const DataLabelSettings(
                         isVisible: true,
+                        labelAlignment: ChartDataLabelAlignment.outer,
+                        textStyle: TextStyle(fontWeight: FontWeight.bold),
                       ),
+                      animationDuration: 500,
                     ),
                   ],
                 ),
               ),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: 24),
             Expanded(
               child: _buildChartContainer(
                 context,
                 "Incident Timeline",
                 SfCartesianChart(
-                  primaryXAxis: DateTimeAxis(dateFormat: DateFormat.Hm()),
+                  plotAreaBorderWidth: 0,
+                  primaryXAxis: DateTimeAxis(
+                    dateFormat: DateFormat.Hm(),
+                    majorGridLines: const MajorGridLines(width: 0),
+                    axisLine: const AxisLine(width: 0),
+                  ),
                   primaryYAxis: NumericAxis(
                     interval: 1,
                     minimum: -0.5,
                     maximum: uniqueApis.length - 0.5,
+                    majorGridLines: MajorGridLines(
+                      width: 1,
+                      color: Theme.of(context).dividerColor.withOpacity(0.3),
+                      dashArray: const <double>[5, 5],
+                    ),
+                    axisLine: const AxisLine(width: 0),
                     axisLabelFormatter: (AxisLabelRenderDetails args) {
                       final index = args.value.round();
                       if (index >= 0 && index < uniqueApis.length) {
@@ -257,7 +294,17 @@ class _DetailsViewState extends State<_DetailsView> {
                       return ChartAxisLabel('', args.textStyle);
                     },
                   ),
-                  tooltipBehavior: TooltipBehavior(enable: true),
+                  tooltipBehavior: TooltipBehavior(
+                    enable: true,
+                    color: Theme.of(context).colorScheme.surface,
+                    textStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                    shadowColor: Colors.black26,
+                    elevation: 5,
+                  ),
+                  zoomPanBehavior: ZoomPanBehavior(
+                    enablePinching: true,
+                    enablePanning: true,
+                  ),
                   series: <CartesianSeries>[
                     ScatterSeries<FailureIncident, DateTime>(
                       dataSource: failures,
@@ -274,6 +321,11 @@ class _DetailsViewState extends State<_DetailsView> {
                         return Colors.grey;
                       },
                       name: 'Incidents',
+                      markerSettings: const MarkerSettings(
+                        height: 12,
+                        width: 12,
+                      ),
+                      animationDuration: 500,
                     ),
                   ],
                 ),
@@ -291,33 +343,74 @@ class _DetailsViewState extends State<_DetailsView> {
       context,
       "Latency Percentiles (ms)",
       SfCartesianChart(
-        primaryXAxis: CategoryAxis(labelRotation: -45),
-        legend: Legend(isVisible: true, position: LegendPosition.bottom),
-        tooltipBehavior: TooltipBehavior(enable: true),
+        plotAreaBorderWidth: 0,
+        primaryXAxis: CategoryAxis(
+          labelRotation: -45,
+          majorGridLines: const MajorGridLines(width: 0),
+          axisLine: const AxisLine(width: 0),
+        ),
+        primaryYAxis: NumericAxis(
+          majorGridLines: MajorGridLines(
+            width: 1,
+            color: Theme.of(context).dividerColor.withOpacity(0.3),
+            dashArray: const <double>[5, 5],
+          ),
+          axisLine: const AxisLine(width: 0),
+        ),
+        legend: Legend(
+          isVisible: true,
+          position: LegendPosition.bottom,
+          overflowMode: LegendItemOverflowMode.wrap,
+        ),
+        trackballBehavior: TrackballBehavior(
+          enable: true,
+          activationMode: ActivationMode.singleTap,
+          tooltipSettings: InteractiveTooltip(
+            color: Theme.of(context).colorScheme.surface,
+            textStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+            borderColor: Theme.of(context).dividerColor,
+            borderWidth: 1,
+          ),
+        ),
+        tooltipBehavior: TooltipBehavior(
+          enable: true,
+          color: Theme.of(context).colorScheme.surface,
+          textStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+          shadowColor: Colors.black26,
+          elevation: 5,
+        ),
         series: <CartesianSeries>[
           ColumnSeries<APIStat, String>(
             dataSource: stats,
             xValueMapper: (s, _) => s.apiName,
             yValueMapper: (s, _) => s.p50,
             name: 'P50',
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+            animationDuration: 500,
           ),
           ColumnSeries<APIStat, String>(
             dataSource: stats,
             xValueMapper: (s, _) => s.apiName,
             yValueMapper: (s, _) => s.p90,
             name: 'P90',
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+            animationDuration: 500,
           ),
           ColumnSeries<APIStat, String>(
             dataSource: stats,
             xValueMapper: (s, _) => s.apiName,
             yValueMapper: (s, _) => s.p95,
             name: 'P95',
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+            animationDuration: 500,
           ),
           ColumnSeries<APIStat, String>(
             dataSource: stats,
             xValueMapper: (s, _) => s.apiName,
             yValueMapper: (s, _) => s.p99,
             name: 'P99',
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+            animationDuration: 500,
           ),
         ],
       ),
@@ -352,14 +445,25 @@ class _DetailsViewState extends State<_DetailsView> {
                 stats.stateDistribution,
               ),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: 24),
             Expanded(
               flex: 2,
               child: _buildChartContainer(
                 context,
                 "Connection State Distribution",
                 SfCircularChart(
-                  legend: Legend(isVisible: true),
+                  legend: Legend(
+                    isVisible: true,
+                    overflowMode: LegendItemOverflowMode.wrap,
+                    position: LegendPosition.right,
+                  ),
+                  tooltipBehavior: TooltipBehavior(
+                    enable: true,
+                    color: Theme.of(context).colorScheme.surface,
+                    textStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                    shadowColor: Colors.black26,
+                    elevation: 5,
+                  ),
                   series: <CircularSeries>[
                     DoughnutSeries<MapEntry<String, int>, String>(
                       dataSource: stats.stateDistribution.entries.toList(),
@@ -367,7 +471,13 @@ class _DetailsViewState extends State<_DetailsView> {
                       yValueMapper: (e, _) => e.value,
                       dataLabelSettings: const DataLabelSettings(
                         isVisible: true,
+                        labelPosition: ChartDataLabelPosition.outside,
+                        connectorLineSettings: ConnectorLineSettings(
+                          type: ConnectorType.curve,
+                        ),
                       ),
+                      animationDuration: 500,
+                      innerRadius: '60%',
                     ),
                   ],
                 ),
@@ -383,36 +493,77 @@ class _DetailsViewState extends State<_DetailsView> {
                 context,
                 "Failure Rate by State (%)",
                 SfCartesianChart(
-                  primaryXAxis: CategoryAxis(),
+                  plotAreaBorderWidth: 0,
+                  primaryXAxis: CategoryAxis(
+                    majorGridLines: const MajorGridLines(width: 0),
+                    axisLine: const AxisLine(width: 0),
+                  ),
+                  primaryYAxis: NumericAxis(
+                    majorGridLines: MajorGridLines(
+                      width: 1,
+                      color: Theme.of(context).dividerColor.withOpacity(0.3),
+                      dashArray: const <double>[5, 5],
+                    ),
+                    axisLine: const AxisLine(width: 0),
+                  ),
+                  tooltipBehavior: TooltipBehavior(
+                    enable: true,
+                    color: Theme.of(context).colorScheme.surface,
+                    textStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                    shadowColor: Colors.black26,
+                    elevation: 5,
+                  ),
                   series: <CartesianSeries>[
                     BarSeries<_ChartData, String>(
                       dataSource: failureData,
                       xValueMapper: (d, _) => d.x,
                       yValueMapper: (d, _) => d.y,
                       color: AppColors.error,
+                      borderRadius: const BorderRadius.all(Radius.circular(4)),
                       dataLabelSettings: const DataLabelSettings(
                         isVisible: true,
                         labelPosition: ChartDataLabelPosition.outside,
                       ),
+                      animationDuration: 500,
                     ),
                   ],
                 ),
               ),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: 24),
             Expanded(
               child: _buildChartContainer(
                 context,
                 "Latency Dist by State",
                 SfCartesianChart(
-                  primaryXAxis: CategoryAxis(),
-                  primaryYAxis: NumericAxis(title: AxisTitle(text: 'ms')),
+                  plotAreaBorderWidth: 0,
+                  primaryXAxis: CategoryAxis(
+                    majorGridLines: const MajorGridLines(width: 0),
+                    axisLine: const AxisLine(width: 0),
+                  ),
+                  primaryYAxis: NumericAxis(
+                    title: AxisTitle(text: 'ms'),
+                    majorGridLines: MajorGridLines(
+                      width: 1,
+                      color: Theme.of(context).dividerColor.withOpacity(0.3),
+                      dashArray: const <double>[5, 5],
+                    ),
+                    axisLine: const AxisLine(width: 0),
+                  ),
+                  tooltipBehavior: TooltipBehavior(
+                    enable: true,
+                    color: Theme.of(context).colorScheme.surface,
+                    textStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                    shadowColor: Colors.black26,
+                    elevation: 5,
+                  ),
                   series: <CartesianSeries>[
                     BoxAndWhiskerSeries<_BoxPlotData, String>(
                       dataSource: boxData,
                       xValueMapper: (d, _) => d.x,
                       yValueMapper: (d, _) => d.y,
                       boxPlotMode: BoxPlotMode.normal,
+                      animationDuration: 500,
                     ),
                   ],
                 ),
@@ -436,11 +587,33 @@ class _DetailsViewState extends State<_DetailsView> {
       context,
       "Signal Strength vs Latency",
       SfCartesianChart(
+        plotAreaBorderWidth: 0,
         primaryXAxis: NumericAxis(
           title: AxisTitle(text: 'Signal Strength (%)'),
+          majorGridLines: const MajorGridLines(width: 0),
+          axisLine: const AxisLine(width: 0),
         ),
-        primaryYAxis: NumericAxis(title: AxisTitle(text: 'Latency (ms)')),
-        legend: Legend(isVisible: true),
+        primaryYAxis: NumericAxis(
+          title: AxisTitle(text: 'Latency (ms)'),
+          majorGridLines: MajorGridLines(
+            width: 1,
+            color: Theme.of(context).dividerColor.withOpacity(0.3),
+            dashArray: const <double>[5, 5],
+          ),
+          axisLine: const AxisLine(width: 0),
+        ),
+        legend: Legend(isVisible: true, position: LegendPosition.bottom),
+        tooltipBehavior: TooltipBehavior(
+          enable: true,
+          color: Theme.of(context).colorScheme.surface,
+          textStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+          shadowColor: Colors.black26,
+          elevation: 5,
+        ),
+        zoomPanBehavior: ZoomPanBehavior(
+          enablePinching: true,
+          enablePanning: true,
+        ),
         series: <CartesianSeries>[
           ScatterSeries<TimeSeriesPoint, int>(
             dataSource: validSignal,
@@ -449,6 +622,11 @@ class _DetailsViewState extends State<_DetailsView> {
             pointColorMapper: (t, _) =>
                 t.connectionState == 'WiFi' ? Colors.blue : Colors.green,
             name: 'Calls',
+            markerSettings: const MarkerSettings(
+              height: 8,
+              width: 8,
+            ),
+            animationDuration: 500,
           ),
         ],
       ),
@@ -521,33 +699,89 @@ class _DetailsViewState extends State<_DetailsView> {
                 context,
                 "Latency Distribution",
                 SfCartesianChart(
-                  primaryXAxis: CategoryAxis(labelRotation: -45),
-                  primaryYAxis: NumericAxis(title: AxisTitle(text: 'ms')),
+                  plotAreaBorderWidth: 0,
+                  primaryXAxis: CategoryAxis(
+                    labelRotation: -45,
+                    majorGridLines: const MajorGridLines(width: 0),
+                    axisLine: const AxisLine(width: 0),
+                  ),
+                  primaryYAxis: NumericAxis(
+                    title: AxisTitle(text: 'ms'),
+                    majorGridLines: MajorGridLines(
+                      width: 1,
+                      color: Theme.of(context).dividerColor.withOpacity(0.3),
+                      dashArray: const <double>[5, 5],
+                    ),
+                    axisLine: const AxisLine(width: 0),
+                  ),
+                  tooltipBehavior: TooltipBehavior(
+                    enable: true,
+                    color: Theme.of(context).colorScheme.surface,
+                    textStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                    shadowColor: Colors.black26,
+                    elevation: 5,
+                  ),
                   series: <CartesianSeries>[
                     BoxAndWhiskerSeries<_BoxPlotData, String>(
                       dataSource: boxData,
                       xValueMapper: (d, _) => d.x,
                       yValueMapper: (d, _) => d.y,
                       boxPlotMode: BoxPlotMode.normal,
+                      animationDuration: 500,
                     ),
                   ],
                 ),
               ),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: 24),
             Expanded(
               child: _buildChartContainer(
                 context,
                 "Latency Over Time",
                 SfCartesianChart(
-                  primaryXAxis: DateTimeAxis(dateFormat: DateFormat.Hms()),
-                  primaryYAxis: NumericAxis(title: AxisTitle(text: 'ms')),
+                  plotAreaBorderWidth: 0,
+                  primaryXAxis: DateTimeAxis(
+                    dateFormat: DateFormat.Hms(),
+                    majorGridLines: const MajorGridLines(width: 0),
+                    axisLine: const AxisLine(width: 0),
+                  ),
+                  primaryYAxis: NumericAxis(
+                    title: AxisTitle(text: 'ms'),
+                    majorGridLines: MajorGridLines(
+                      width: 1,
+                      color: Theme.of(context).dividerColor.withOpacity(0.3),
+                      dashArray: const <double>[5, 5],
+                    ),
+                    axisLine: const AxisLine(width: 0),
+                  ),
+                  tooltipBehavior: TooltipBehavior(
+                    enable: true,
+                    color: Theme.of(context).colorScheme.surface,
+                    textStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                    shadowColor: Colors.black26,
+                    elevation: 5,
+                  ),
+                  trackballBehavior: TrackballBehavior(
+                    enable: true,
+                    activationMode: ActivationMode.singleTap,
+                    tooltipSettings: InteractiveTooltip(
+                      color: Theme.of(context).colorScheme.surface,
+                      textStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                      borderColor: Theme.of(context).dividerColor,
+                      borderWidth: 1,
+                    ),
+                  ),
+                  zoomPanBehavior: ZoomPanBehavior(
+                    enablePinching: true,
+                    enablePanning: true,
+                  ),
                   series: <CartesianSeries>[
-                    LineSeries<MapEntry<DateTime, double>, DateTime>(
+                    FastLineSeries<MapEntry<DateTime, double>, DateTime>(
                       dataSource: sampledTimeData,
                       xValueMapper: (d, _) => d.key,
                       yValueMapper: (d, _) => d.value,
                       name: 'Latency',
+                      animationDuration: 500,
                     ),
                   ],
                 ),
@@ -563,28 +797,76 @@ class _DetailsViewState extends State<_DetailsView> {
                 context,
                 "Average Latency",
                 SfCartesianChart(
-                  primaryXAxis: CategoryAxis(labelRotation: -45),
+                  plotAreaBorderWidth: 0,
+                  primaryXAxis: CategoryAxis(
+                    labelRotation: -45,
+                    majorGridLines: const MajorGridLines(width: 0),
+                    axisLine: const AxisLine(width: 0),
+                  ),
+                  primaryYAxis: NumericAxis(
+                    majorGridLines: MajorGridLines(
+                      width: 1,
+                      color: Theme.of(context).dividerColor.withOpacity(0.3),
+                      dashArray: const <double>[5, 5],
+                    ),
+                    axisLine: const AxisLine(width: 0),
+                  ),
+                  tooltipBehavior: TooltipBehavior(
+                    enable: true,
+                    color: Theme.of(context).colorScheme.surface,
+                    textStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                    shadowColor: Colors.black26,
+                    elevation: 5,
+                  ),
                   series: <CartesianSeries>[
                     ColumnSeries<_ChartData, String>(
                       dataSource: avgData,
                       xValueMapper: (d, _) => d.x,
                       yValueMapper: (d, _) => d.y,
+                      borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
                       dataLabelSettings: const DataLabelSettings(
                         isVisible: true,
+                        labelAlignment: ChartDataLabelAlignment.outer,
+                        textStyle: TextStyle(fontWeight: FontWeight.bold),
                       ),
+                      animationDuration: 500,
                     ),
                   ],
                 ),
               ),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: 24),
             Expanded(
               child: _buildChartContainer(
                 context,
                 "Status Code Dist (All Data)",
                 SfCartesianChart(
-                  primaryXAxis: CategoryAxis(labelRotation: -45),
-                  legend: Legend(isVisible: true),
+                  plotAreaBorderWidth: 0,
+                  primaryXAxis: CategoryAxis(
+                    labelRotation: -45,
+                    majorGridLines: const MajorGridLines(width: 0),
+                    axisLine: const AxisLine(width: 0),
+                  ),
+                  primaryYAxis: NumericAxis(
+                    majorGridLines: MajorGridLines(
+                      width: 1,
+                      color: Theme.of(context).dividerColor.withOpacity(0.3),
+                      dashArray: const <double>[5, 5],
+                    ),
+                    axisLine: const AxisLine(width: 0),
+                  ),
+                  legend: Legend(
+                    isVisible: true,
+                    position: LegendPosition.bottom,
+                    overflowMode: LegendItemOverflowMode.wrap,
+                  ),
+                  tooltipBehavior: TooltipBehavior(
+                    enable: true,
+                    color: Theme.of(context).colorScheme.surface,
+                    textStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                    shadowColor: Colors.black26,
+                    elevation: 5,
+                  ),
                   series: _buildStatusSeries(
                     rawData,
                   ), // Always show all for status dist
@@ -623,6 +905,7 @@ class _DetailsViewState extends State<_DetailsView> {
           xValueMapper: (d, _) => d.x,
           yValueMapper: (d, _) => d.y,
           name: status.toString(),
+          animationDuration: 500,
         ),
       );
     }
@@ -638,23 +921,31 @@ class _DetailsViewState extends State<_DetailsView> {
   ) {
     final theme = Theme.of(context);
     return Container(
-      height: 350,
-      padding: const EdgeInsets.all(16),
+      height: 700, // Increased height as requested
+      padding: const EdgeInsets.all(24), // Increased padding for better spacing
       decoration: BoxDecoration(
         color: theme.cardColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: theme.dividerColor),
+        borderRadius: BorderRadius.circular(16), // More rounded corners
+        border: Border.all(color: theme.dividerColor.withOpacity(0.5)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             title,
-            style: AppTypography.h4.copyWith(
+            style: AppTypography.h3.copyWith( // Larger title
               color: theme.colorScheme.onSurface,
+              fontWeight: FontWeight.w600,
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 24),
           Expanded(child: chart),
         ],
       ),
