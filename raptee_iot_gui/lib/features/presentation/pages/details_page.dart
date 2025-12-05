@@ -8,9 +8,7 @@ import '../bloc/dashboard_bloc.dart';
 import '../bloc/dashboard_event.dart';
 import '../bloc/dashboard_state.dart';
 import '../../data/repositories/dashboard_repository.dart';
-import '../../data/datasources/dashboard_remote_datasource.dart';
 import '../../data/models/analytics_model.dart';
-import '../../../core/network/api_client.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/chart_utils.dart';
@@ -27,9 +25,8 @@ class DetailsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final apiClient = ApiClient();
-    final dataSource = DashboardRemoteDataSourceImpl(apiClient: apiClient);
-    final repository = DashboardRepository(remoteDataSource: dataSource);
+    // Reuse the repository provided by ShellRoute/RepositoryProvider
+    final repository = context.read<DashboardRepository>();
 
     return BlocProvider(
       create: (context) =>

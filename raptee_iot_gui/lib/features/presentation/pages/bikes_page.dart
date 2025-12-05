@@ -327,8 +327,8 @@ class _BikesViewState extends State<_BikesView> {
                             );
 
                             return InkWell(
-                              onTap: () {
-                                context.goNamed(
+                                onTap: () {
+                                context.pushNamed(
                                   'details',
                                   pathParameters: {'bikeId': bike.bikeId},
                                 );
